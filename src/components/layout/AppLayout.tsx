@@ -20,8 +20,21 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     }
   }, [currentUser, isLoading, isAuthPage, router]);
 
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen bg-slate-950 flex flex-col items-center justify-center text-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        <p className="text-xs text-slate-400 mt-2">Loading SalesTrack...</p>
+      </div>
+    );
+  }
+
   if (isAuthPage) {
     return <main className="min-h-screen bg-slate-950 text-slate-100">{children}</main>;
+  }
+
+  if (!currentUser) {
+    return null;
   }
 
   return (
