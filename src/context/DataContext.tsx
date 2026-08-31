@@ -1,18 +1,18 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { 
-  Product, Category, Supplier, PurchaseOrder, Sale, 
+import {
+  Product, Category, Supplier, PurchaseOrder, Sale,
   StockAdjustment, ProductReturn, DashboardMetrics, CartItem,
   PaymentMethod, PaymentDetails, PurchasePaymentRecord
 } from '@/types';
-import { 
-  INITIAL_PRODUCTS, INITIAL_CATEGORIES, INITIAL_SUPPLIERS, 
-  INITIAL_PURCHASES, INITIAL_SALES, INITIAL_ADJUSTMENTS, INITIAL_RETURNS 
+import {
+  INITIAL_PRODUCTS, INITIAL_CATEGORIES, INITIAL_SUPPLIERS,
+  INITIAL_PURCHASES, INITIAL_SALES, INITIAL_ADJUSTMENTS, INITIAL_RETURNS
 } from '@/lib/mockData';
-import { 
-  generateInvoiceNumber, generatePONumber, generateReceiptNumber, 
-  generateReturnNumber 
+import {
+  generateInvoiceNumber, generatePONumber, generateReceiptNumber,
+  generateReturnNumber
 } from '@/lib/utils';
 
 interface DataContextType {
@@ -202,7 +202,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateProduct = (id: string, productUpdates: Partial<Product>) => {
-    const updated = products.map(p => 
+    const updated = products.map(p =>
       p.id === id ? { ...p, ...productUpdates, updatedAt: new Date().toISOString() } : p
     );
     saveProducts(updated);
@@ -361,7 +361,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!po || po.status === 'Received') return;
 
     // 1. Mark PO as Received
-    const updatedPurchases = purchases.map(p => 
+    const updatedPurchases = purchases.map(p =>
       p.id === poId ? { ...p, status: 'Received' as const, receivedDate: new Date().toISOString() } : p
     );
     savePurchases(updatedPurchases);
@@ -375,8 +375,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (prod) {
         const qtyBefore = prod.stockQuantity;
         const qtyAfter = qtyBefore + item.quantity;
-        
-        updatedProducts = updatedProducts.map(p => 
+
+        updatedProducts = updatedProducts.map(p =>
           p.id === prod.id ? { ...p, stockQuantity: qtyAfter, purchasePrice: item.unitCost } : p
         );
 
@@ -539,7 +539,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const qtyBefore = prod.stockQuantity;
         const qtyAfter = Math.max(0, qtyBefore - cartItem.quantity);
 
-        updatedProducts = updatedProducts.map(p => 
+        updatedProducts = updatedProducts.map(p =>
           p.id === prod.id ? { ...p, stockQuantity: qtyAfter } : p
         );
 
@@ -682,7 +682,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const saleDate = new Date(sale.saleDate);
       if (sale.status === 'Completed') {
         netRevenue += sale.totalAmount;
-        
+
         sale.items.forEach(item => {
           totalCostOfSoldGoods += (item.costPrice * item.quantity);
         });

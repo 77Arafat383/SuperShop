@@ -101,7 +101,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
 
       {/* Product Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3.5 overflow-y-auto pr-1 flex-1">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-2 sm:gap-3.5 justify-center content-start overflow-y-auto pr-1 flex-1">
         {filteredProducts.length === 0 ? (
           <div className="col-span-full py-12 text-center text-slate-400">
             <ShoppingBag className="w-12 h-12 mx-auto mb-2 opacity-40" />
@@ -120,67 +120,82 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               <div
                 key={product.id}
                 onClick={() => !isOutOfStock && handleAdd(product)}
-                className={`group relative bg-white dark:bg-slate-900 rounded-2xl border p-2.5 sm:p-3.5 flex flex-col justify-between transition-all select-none ${
+                className={`group relative bg-white dark:bg-slate-900 rounded-3xl border p-3 flex flex-col justify-between transition-all duration-300 select-none max-w-[190px] w-full mx-auto ${
                   isOutOfStock
-                    ? 'opacity-50 cursor-not-allowed border-slate-200 dark:border-slate-800'
-                    : 'cursor-pointer hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 active:scale-[0.98] border-slate-200 dark:border-slate-800'
+                    ? 'opacity-60 cursor-not-allowed border-slate-200 dark:border-slate-800'
+                    : 'cursor-pointer hover:border-blue-500/80 hover:shadow-xl hover:shadow-blue-500/5 active:scale-[0.98] border-slate-200 dark:border-slate-800/80'
                 } ${isJustAdded ? 'ring-2 ring-blue-500 scale-[1.02]' : ''}`}
               >
-                {/* Badges row */}
-                <div className="flex items-center justify-between gap-1 mb-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">
-                    {product.brand}
-                  </span>
+                {/* Visual Avatar Preview */}
+                <div className="w-full h-20 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950/50 dark:to-slate-900/50 border border-slate-100 dark:border-slate-800/60 flex items-center justify-center mb-2.5 relative overflow-hidden group-hover:from-blue-500/5 dark:group-hover:from-blue-500/10 transition-colors duration-300">
+                  {product.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <span className="text-base font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent tracking-wider group-hover:scale-110 transition-transform duration-300">
+                      {product.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+                    </span>
+                  )}
                   
-                  <div className="flex items-center gap-1">
-                    {hasDiscount && (
-                      <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-rose-500 text-white flex items-center gap-0.5">
-                        <Tag className="w-2.5 h-2.5" />
-                        -৳{product.discount}
-                      </span>
-                    )}
+                  {/* Top-Right Tag: Stock Status */}
+                  <div className="absolute top-1.5 right-1.5">
                     {isOutOfStock ? (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300">
+                      <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-lg bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/50">
                         Out
                       </span>
                     ) : isLowStock ? (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 flex items-center gap-0.5">
-                        <AlertTriangle className="w-2.5 h-2.5" />
-                        {product.stockQuantity}
+                      <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50 flex items-center gap-0.5">
+                        Only {product.stockQuantity}
                       </span>
                     ) : (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
                         {product.stockQuantity} {product.unit}
                       </span>
                     )}
                   </div>
+
+                  {/* Top-Left Discount Tag */}
+                  {hasDiscount && (
+                    <div className="absolute top-1.5 left-1.5">
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded-lg bg-gradient-to-r from-rose-500 to-orange-500 text-white flex items-center gap-0.5 shadow-sm shadow-rose-500/20">
+                        <Tag className="w-2.5 h-2.5" />
+                        -৳{product.discount}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Product Name & SKU */}
-                <div className="mb-3">
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                {/* Brand & SKU info */}
+                <div className="flex items-center justify-between text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+                  <span className="truncate max-w-[80px]">{product.brand}</span>
+                  <span className="font-mono text-slate-400/85">{product.sku}</span>
+                </div>
+
+                {/* Product Name */}
+                <div className="mb-2">
+                  <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300" title={product.name}>
                     {product.name}
                   </h4>
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-1 font-mono">
-                    <Barcode className="w-3 h-3" />
-                    <span>{product.barcode}</span>
-                  </div>
                 </div>
 
                 {/* Bottom Pricing & Add Button */}
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-                  <div>
+                  <div className="flex flex-col h-8 justify-end">
                     {hasDiscount ? (
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-sm font-extrabold text-blue-600 dark:text-blue-400">
-                          {formatBDT(discountedPrice)}
-                        </span>
-                        <span className="text-[10px] text-slate-400 line-through">
+                      <>
+                        <span className="text-[10px] text-slate-400 line-through leading-none mb-0.5">
                           {formatBDT(product.sellingPrice)}
                         </span>
-                      </div>
+                        <span className="text-xs font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                          {formatBDT(discountedPrice)}
+                        </span>
+                      </>
                     ) : (
-                      <span className="text-sm font-extrabold text-slate-900 dark:text-white">
+                      <span className="text-xs font-black text-slate-900 dark:text-white">
                         {formatBDT(product.sellingPrice)}
                       </span>
                     )}
@@ -188,10 +203,12 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
                   <button
                     disabled={isOutOfStock}
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center transition ${
+                    className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm ${
                       isJustAdded
                         ? 'bg-emerald-600 text-white'
-                        : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'
+                        : isOutOfStock
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                        : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-blue-500/20 active:scale-90'
                     }`}
                   >
                     {isJustAdded ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}

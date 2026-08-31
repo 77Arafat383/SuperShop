@@ -35,6 +35,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [minStockLevel, setMinStockLevel] = useState<number>(5);
   const [unit, setUnit] = useState('pcs');
   const [supplierId, setSupplierId] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [status, setStatus] = useState<'Active' | 'Inactive'>('Active');
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       setMinStockLevel(editingProduct.minStockLevel || 5);
       setUnit(editingProduct.unit || 'pcs');
       setSupplierId(editingProduct.supplierId || '');
+      setImageUrl(editingProduct.imageUrl || '');
       setStatus(editingProduct.status as any || 'Active');
     } else {
       setName('');
@@ -67,9 +69,21 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       setMinStockLevel(5);
       setUnit('pcs');
       setSupplierId(suppliers[0]?.id || '');
+      setImageUrl('');
       setStatus('Active');
     }
   }, [editingProduct, isOpen, categories, suppliers]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -94,6 +108,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
       unit,
       supplierId,
       supplierName: supplier?.name || 'Local Supplier',
+      imageUrl,
       status,
     });
     onClose();
@@ -132,6 +147,26 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 placeholder="e.g. Radhuni Pure Mustard Oil 500ml"
                 className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
               />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Product Image / Photo
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-500 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 dark:file:bg-blue-950/60 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 focus:outline-none focus:border-blue-500"
+                />
+                {imageUrl && (
+                  <div className="w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shrink-0 shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageUrl} alt="Product preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>

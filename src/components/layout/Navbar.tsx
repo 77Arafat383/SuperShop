@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-  Boxes, ShoppingCart, UserCheck, LogOut, Bell,
+  Boxes, UserCheck, LogOut, Bell,
   Sparkles, FileText, ChevronDown, CheckCircle2, User as LucideUser, Menu
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -65,16 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         {/* Right Actions & Profile */}
         <div className="flex items-center gap-3 sm:gap-4">
 
-          {/* Quick POS Access for Cashier / Admin */}
-          {(currentUser?.role === 'Administrator' || currentUser?.role === 'Cashier') && (
-            <Link
-              href="/pos"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-sm shadow-blue-500/20 transition"
-            >
-              <ShoppingCart className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">POS Terminal</span>
-            </Link>
-          )}
+
 
           {/* Low stock alert icon */}
           <Link
