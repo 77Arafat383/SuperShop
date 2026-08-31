@@ -90,8 +90,8 @@ export const Sidebar: React.FC = () => {
   const filteredNavItems = navItems.filter(item => item.allowedRoles.includes(currentRole));
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 min-h-[calc(100vh-4rem)] flex flex-col justify-between p-4 shrink-0 hidden md:flex border-r border-slate-800">
-      <div className="space-y-1">
+    <aside className="w-64 bg-slate-900 text-slate-300 h-full flex flex-col justify-between p-4 shrink-0 hidden md:flex border-r border-slate-800">
+      <div className="space-y-1 overflow-y-auto flex-1 pr-1 scrollbar-none">
         <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
           {currentRole}
         </div>

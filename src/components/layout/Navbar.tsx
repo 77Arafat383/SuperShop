@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-  Building2, ShoppingCart, UserCheck, LogOut, Bell,
+  Boxes, ShoppingCart, UserCheck, LogOut, Bell,
   Sparkles, FileText, ChevronDown, CheckCircle2, User as LucideUser
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -35,12 +35,12 @@ export const Navbar: React.FC = () => {
         {/* Left Branding */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-            <Building2 className="w-5 h-5" />
+            <Boxes className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">
-                RBMS
+                SalesTrack
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
@@ -97,11 +97,11 @@ export const Navbar: React.FC = () => {
             {isProfileOpen && (
               <>
                 {/* Overlay to close the menu on click outside */}
-                <div 
-                  className="fixed inset-0 z-40" 
+                <div
+                  className="fixed inset-0 z-40"
                   onClick={() => setIsProfileOpen(false)}
                 />
-                
+
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-1 transition animate-fade-in z-50">
                   <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-700">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Role</p>

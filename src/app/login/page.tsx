@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Building2, Lock, Mail, User as UserIcon, Phone, 
+  Boxes, Lock, Mail, User as UserIcon, Phone, 
   ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, Sparkles, KeyRound 
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -114,13 +114,13 @@ export default function LoginPage() {
       {/* Header Banner */}
       <div className="text-center max-w-lg mb-8 z-10">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-xl shadow-blue-500/25 mb-4">
-          <Building2 className="w-8 h-8 text-white" />
+          <Boxes className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-          Sales & Inventory Tracking System
+          SalesTrack
         </h1>
         <p className="text-sm text-slate-400 mt-1">
-          Noakhali Science & Technology University • CSTE 3208 Project
+          Sales & Inventory Tracking System
         </p>
       </div>
 
@@ -368,7 +368,7 @@ export default function LoginPage() {
       </div>
 
       <div className="mt-6 text-xs text-slate-500 text-center">
-        Sales & Inventory Tracking System (RBMS) • NSTU CSTE 3208
+        SalesTrack • Sales & Inventory Tracking System
       </div>
     </div>
   );

@@ -25,9 +25,9 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased">
+    <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased overflow-hidden">
       <Navbar />
-      <div className="flex flex-1">
+      <div className="flex flex-1 h-[calc(100vh-4rem)] overflow-hidden">
         <Sidebar />
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
           {children}
