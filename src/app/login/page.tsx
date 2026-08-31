@@ -175,8 +175,8 @@ export default function LoginPage() {
             type="button"
             onClick={() => { setActiveTab('login'); setErrorMsg(''); setSuccessMsg(''); }}
             className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'login'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-white'
               }`}
           >
             Sign In with Email
@@ -185,8 +185,8 @@ export default function LoginPage() {
             type="button"
             onClick={() => { setActiveTab('register'); setErrorMsg(''); setSuccessMsg(''); }}
             className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'register'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-white'
               }`}
           >
             Apply for Account
@@ -222,7 +222,7 @@ export default function LoginPage() {
                   required
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
-                  placeholder="e.g. admin@ims.nstu.edu.bd"
+                  placeholder="e.g. example@gmail.com"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
                 />
               </div>
@@ -292,7 +292,7 @@ export default function LoginPage() {
                   required
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
-                  placeholder="e.g. arafat.cste@nstu.edu.bd"
+                  placeholder="e.g. example@gmail.com"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
                 />
               </div>
@@ -365,8 +365,14 @@ export default function LoginPage() {
         )}
       </div>
 
-      <div className="mt-6 text-xs text-slate-500 text-center">
-        SalesTrack • Sales & Inventory Tracking System
+      <div className="mt-6 text-[11px] text-slate-500 text-center space-y-1">
+        <p>
+          By signing in or submitting a request, you agree to our{' '}
+          <a href="#" className="text-blue-500 hover:underline">Terms of Service</a>{' '}
+          and{' '}
+          <a href="#" className="text-blue-500 hover:underline">Privacy Policy</a>.
+        </p>
+
       </div>
     </div>
   );
