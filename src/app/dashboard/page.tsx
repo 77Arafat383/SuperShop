@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { 
-  TrendingUp, ShoppingBag, ShoppingCart, Truck, Boxes, 
-  RotateCcw, AlertTriangle, Users, ArrowUpRight, DollarSign, 
-  Calendar, CheckCircle2, Sparkles, Plus, Clock 
+import {
+  TrendingUp, ShoppingBag, ShoppingCart, Truck, Boxes,
+  RotateCcw, AlertTriangle, Users, ArrowUpRight, DollarSign,
+  Calendar, CheckCircle2, Sparkles, Plus, Clock
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
@@ -38,14 +38,11 @@ export default function DashboardPage() {
             <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20">
               {currentUser?.role || 'Guest'} Session
             </span>
-            <span className="text-xs text-blue-100">NSTU CSTE 3208</span>
           </div>
           <h1 className="text-2xl font-black tracking-tight mt-1">
             Welcome back, {currentUser?.name}!
           </h1>
-          <p className="text-xs text-blue-100 mt-1 max-w-xl">
-            Retail Business Management System (RBMS) • Real-time sales telemetry, supplier procurement dues, and warehouse inventory tracking.
-          </p>
+
         </div>
 
         {/* Quick Action Buttons */}

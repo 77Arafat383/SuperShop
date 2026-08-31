@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Boxes, Lock, Mail, User as UserIcon, Phone, 
-  ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, Sparkles, KeyRound 
+import {
+  Boxes, Lock, Mail, User as UserIcon, Phone,
+  ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, Sparkles, KeyRound
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
@@ -14,11 +14,11 @@ export default function LoginPage() {
   const { login, register, quickLoginAs, users } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
-  
+
   // Login fields
   const [loginEmail, setLoginEmail] = useState('admin@ims.nstu.edu.bd');
   const [loginPassword, setLoginPassword] = useState('admin123');
-  
+
   // Registration fields
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -174,22 +174,20 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => { setActiveTab('login'); setErrorMsg(''); setSuccessMsg(''); }}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${
-              activeTab === 'login'
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'login'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
-            }`}
+              }`}
           >
             Sign In with Email
           </button>
           <button
             type="button"
             onClick={() => { setActiveTab('register'); setErrorMsg(''); setSuccessMsg(''); }}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${
-              activeTab === 'register'
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${activeTab === 'register'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
-            }`}
+              }`}
           >
             Apply for Account
           </button>
@@ -345,10 +343,10 @@ export default function LoginPage() {
                 onChange={(e) => setRequestedRole(e.target.value as UserRole)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 transition"
               >
-                <option value="Cashier">Cashier (Point of Sale & Billing)</option>
-                <option value="Inventory Manager">Inventory Manager (Stock In/Out & Adjustments)</option>
-                <option value="Purchase Manager">Purchase Manager (Supplier Orders & Payments)</option>
-                <option value="Administrator">Administrator (System Approval Required)</option>
+                <option value="Cashier">Cashier</option>
+                <option value="Inventory Manager">Inventory Manager</option>
+                <option value="Purchase Manager">Purchase Manager</option>
+                <option value="Administrator">Administrator</option>
               </select>
               <p className="text-[11px] text-amber-400/90 mt-1">
                 Note: All new registrations require Administrator approval before access is granted.
