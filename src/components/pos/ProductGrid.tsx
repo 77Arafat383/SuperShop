@@ -101,7 +101,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
 
       {/* Product Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5 overflow-y-auto pr-1 flex-1">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3.5 overflow-y-auto pr-1 flex-1">
         {filteredProducts.length === 0 ? (
           <div className="col-span-full py-12 text-center text-slate-400">
             <ShoppingBag className="w-12 h-12 mx-auto mb-2 opacity-40" />
@@ -120,7 +120,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               <div
                 key={product.id}
                 onClick={() => !isOutOfStock && handleAdd(product)}
-                className={`group relative bg-white dark:bg-slate-900 rounded-2xl border p-3.5 flex flex-col justify-between transition-all select-none ${
+                className={`group relative bg-white dark:bg-slate-900 rounded-2xl border p-2.5 sm:p-3.5 flex flex-col justify-between transition-all select-none ${
                   isOutOfStock
                     ? 'opacity-50 cursor-not-allowed border-slate-200 dark:border-slate-800'
                     : 'cursor-pointer hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 active:scale-[0.98] border-slate-200 dark:border-slate-800'

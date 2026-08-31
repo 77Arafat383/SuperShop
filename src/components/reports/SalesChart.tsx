@@ -16,9 +16,16 @@ interface SalesChartProps {
   }>;
 }
 
+const formatYAxis = (value: number) => {
+  if (value >= 1000) {
+    return `৳${(value / 1000).toFixed(0)}k`;
+  }
+  return `৳${value}`;
+};
+
 export const SalesChart: React.FC<SalesChartProps> = ({ data }) => {
   return (
-    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+    <div className="bg-white dark:bg-slate-900 p-3 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-white">
@@ -45,7 +52,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({ data }) => {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
             <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} />
-            <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => `৳${v}`} />
+            <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={formatYAxis} />
             <Tooltip 
               contentStyle={{ 
                 backgroundColor: '#0f172a', 

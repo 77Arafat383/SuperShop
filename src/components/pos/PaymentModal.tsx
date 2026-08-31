@@ -164,7 +164,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         </div>
 
         {/* Payment Method Selector Tabs */}
-        <div className="p-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 grid grid-cols-5 gap-1.5">
+        <div className="p-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 grid grid-cols-3 sm:grid-cols-5 gap-1.5">
           <button
             onClick={() => { setSelectedMethod('Cash'); }}
             className={`py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center gap-1 transition ${

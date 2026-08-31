@@ -32,7 +32,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 text-white shadow-xl shadow-blue-600/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 text-white shadow-xl shadow-blue-600/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20">
@@ -72,7 +72,7 @@ export default function DashboardPage() {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Today's Sales */}
-        <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
             <span>Today&apos;s Sales</span>
             <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600">
@@ -89,7 +89,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 2. Monthly & Yearly Purchases */}
-        <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
             <span>Procurement Spend</span>
             <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600">
@@ -106,7 +106,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 3. Product Returns & Return Rate */}
-        <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
             <span>Total Product Returns</span>
             <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950 text-purple-600">
@@ -123,7 +123,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 4. Total Gross Profit */}
-        <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
             <span>Total Gross Profit</span>
             <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600">

@@ -4,13 +4,17 @@ import React from 'react';
 import Link from 'next/link';
 import {
   Boxes, ShoppingCart, UserCheck, LogOut, Bell,
-  Sparkles, FileText, ChevronDown, CheckCircle2, User as LucideUser
+  Sparkles, FileText, ChevronDown, CheckCircle2, User as LucideUser, Menu
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { UserRole } from '@/types';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  onToggleSidebar?: () => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const { currentUser, logout, switchRole } = useAuth();
   const { products } = useData();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
@@ -34,6 +38,15 @@ export const Navbar: React.FC = () => {
       <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Left Branding */}
         <div className="flex items-center gap-3">
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="block md:hidden p-1.5 -ml-1 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              title="Toggle Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
             <Boxes className="w-5 h-5" />
           </div>

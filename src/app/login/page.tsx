@@ -124,49 +124,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* 1-Click Fast Demo Role Login Bar */}
-      <div className="w-full max-w-xl bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-4 mb-6 shadow-2xl z-10">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" /> 1-Click Fast Demo Login
-          </span>
-          <span className="text-[11px] text-slate-400">Select any role to test RBAC</span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <button
-            onClick={() => handleQuickLogin('Administrator')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-800/50 hover:border-purple-500 text-purple-200 transition text-xs font-semibold group"
-          >
-            <ShieldCheck className="w-4 h-4 text-purple-400 mb-1 group-hover:scale-110 transition-transform" />
-            <span>Administrator</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickLogin('Cashier')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-blue-950/40 hover:bg-blue-900/60 border border-blue-800/50 hover:border-blue-500 text-blue-200 transition text-xs font-semibold group"
-          >
-            <UserIcon className="w-4 h-4 text-blue-400 mb-1 group-hover:scale-110 transition-transform" />
-            <span>Cashier (POS)</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickLogin('Inventory Manager')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/50 hover:border-amber-500 text-amber-200 transition text-xs font-semibold group"
-          >
-            <KeyRound className="w-4 h-4 text-amber-400 mb-1 group-hover:scale-110 transition-transform" />
-            <span>Inventory Mgr</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickLogin('Purchase Manager')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/50 hover:border-emerald-500 text-emerald-200 transition text-xs font-semibold group"
-          >
-            <ShieldCheck className="w-4 h-4 text-emerald-400 mb-1 group-hover:scale-110 transition-transform" />
-            <span>Purchase Mgr</span>
-          </button>
-        </div>
-      </div>
-
       {/* Main Login / Registration Card */}
       <div className="w-full max-w-xl bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl z-10">
         {/* Tab switcher */}

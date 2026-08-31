@@ -4,7 +4,7 @@ export const INITIAL_USERS: User[] = [
   {
     id: 'usr_admin',
     name: 'Md. Yeasin Arafat',
-    email: 'admin@ims.nstu.edu.bd',
+    email: 'arafat@gmail.com',
     role: 'Administrator',
     status: 'Active',
     phone: '+880 1812-345678',
@@ -14,7 +14,7 @@ export const INITIAL_USERS: User[] = [
   {
     id: 'usr_inventory',
     name: 'Ahosan Habib',
-    email: 'inventory@ims.nstu.edu.bd',
+    email: 'ahosan@gmail.com',
     role: 'Inventory Manager',
     status: 'Active',
     phone: '+880 1711-223344',
@@ -23,8 +23,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id: 'usr_purchase',
-    name: 'Dr. Nazia Majadi',
-    email: 'purchase@ims.nstu.edu.bd',
+    name: 'Ismail Hossain',
+    email: 'ismail@gmail.com',
     role: 'Purchase Manager',
     status: 'Active',
     phone: '+880 1912-998877',
@@ -33,8 +33,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id: 'usr_cashier',
-    name: 'Tanvir Hossain',
-    email: 'cashier@ims.nstu.edu.bd',
+    name: 'Nusrat Jahan',
+    email: 'nusrat@gmail.com',
     role: 'Cashier',
     status: 'Active',
     phone: '+880 1622-445566',

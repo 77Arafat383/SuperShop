@@ -18,7 +18,13 @@ interface NavItem {
   badge?: string;
 }
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  className?: string;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
+  className = "w-64 bg-slate-900 text-slate-300 h-full flex flex-col justify-between p-4 shrink-0 hidden md:flex border-r border-slate-800"
+}) => {
   const pathname = usePathname();
   const { currentUser } = useAuth();
   const currentRole = currentUser?.role || 'Cashier';
@@ -90,7 +96,7 @@ export const Sidebar: React.FC = () => {
   const filteredNavItems = navItems.filter(item => item.allowedRoles.includes(currentRole));
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 h-full flex flex-col justify-between p-4 shrink-0 hidden md:flex border-r border-slate-800">
+    <aside className={className}>
       <div className="space-y-1 overflow-y-auto flex-1 pr-1 scrollbar-none">
         <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
           {currentRole}

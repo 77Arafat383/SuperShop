@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { 
-  BarChart3, Calendar, Download, Printer, TrendingUp, 
-  Boxes, Truck, ShoppingCart, RotateCcw, Award, FileSpreadsheet 
+  BarChart3, Calendar, Printer, TrendingUp, 
+  Boxes, Truck, ShoppingCart, RotateCcw, Award
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { SalesChart } from '@/components/reports/SalesChart';
@@ -97,33 +97,7 @@ export default function ReportsPage() {
     };
   }, [sales, purchases, products]);
 
-  const handleExportCSV = () => {
-    const csvRows = [
-      ['Sales & Inventory Tracking System (RBMS) - Executive Summary Report'],
-      ['Generated On', new Date().toLocaleString()],
-      [],
-      ['Metric', 'Amount (BDT)'],
-      ['Total Sales Revenue', reportData.totalRevenue],
-      ['Cost of Goods Sold (COGS)', reportData.totalCOGS],
-      ['Total Gross Profit', reportData.grossProfit],
-      ['Profit Margin %', `${reportData.profitMargin}%`],
-      ['Total Inventory Valuation (Cost)', reportData.totalInventoryCost],
-      ['Total Inventory Potential Retail', reportData.totalInventoryRetail],
-      ['Total Purchases Spend', reportData.totalPurchasesAmt],
-      [],
-      ['Top Velocity Products', 'Sold Units', 'Revenue', 'Profit'],
-      ...reportData.topProductsList.map(p => [p.name, p.soldUnits, p.revenue, p.profit]),
-    ];
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(e => e.join(',')).join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `RBMS_Report_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   return (
     <div className="space-y-6">
@@ -145,14 +119,6 @@ export default function ReportsPage() {
           >
             <Printer className="w-4 h-4" />
             <span>Print Report</span>
-          </button>
-
-          <button
-            onClick={handleExportCSV}
-            className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/30 flex items-center gap-1.5 transition no-print"
-          >
-            <Download className="w-4 h-4" />
-            <span>Export CSV</span>
           </button>
         </div>
       </div>
@@ -227,6 +193,51 @@ export default function ReportsPage() {
         />
 
         <TopProductsTable topProducts={reportData.topProductsList} />
+      </div>
+
+      {/* Hidden printable P&L area */}
+      <div className="printable-receipt-area hidden print:block bg-white text-black p-8 font-sans max-w-2xl mx-auto space-y-6">
+        <div className="text-center border-b pb-4">
+          <h1 className="text-xl font-bold uppercase tracking-wide">Profit & Loss (P&L) Statement</h1>
+          <p className="text-xs text-slate-500">SalesTrack Business Analytics System</p>
+          <p className="text-[10px] text-slate-400 mt-1">Generated: {new Date().toLocaleString()}</p>
+        </div>
+
+        <div className="space-y-3 text-xs">
+          <div className="flex justify-between items-center py-2 border-b">
+            <span className="font-medium text-slate-700">Gross Sales Revenue</span>
+            <span className="font-bold">{formatBDT(reportData.totalRevenue)}</span>
+          </div>
+
+          <div className="flex justify-between items-center py-2 border-b text-rose-600">
+            <span className="font-medium">Cost of Goods Sold (COGS)</span>
+            <span className="font-bold">- {formatBDT(reportData.totalCOGS)}</span>
+          </div>
+
+          <div className="flex justify-between items-center py-2 border-b text-rose-600">
+            <span className="font-medium">Discounts Deducted</span>
+            <span className="font-bold">- {formatBDT(reportData.totalDiscounts)}</span>
+          </div>
+
+          <div className="flex justify-between items-center py-2 border-b text-blue-600">
+            <span className="font-medium">Govt VAT (5%) Collected</span>
+            <span className="font-bold">{formatBDT(reportData.totalTax)}</span>
+          </div>
+
+          <div className="flex justify-between items-center py-3 pt-4 border-t-2 border-double border-slate-800">
+            <span className="font-bold uppercase text-slate-900">Net Gross Profit</span>
+            <span className="text-lg font-black text-emerald-600">{formatBDT(reportData.grossProfit)}</span>
+          </div>
+
+          <div className="flex justify-between items-center py-2">
+            <span className="font-medium text-slate-600">Gross Profit Margin</span>
+            <span className="font-bold text-slate-800">{reportData.profitMargin}%</span>
+          </div>
+        </div>
+
+        <div className="pt-12 text-center text-[10px] text-slate-400 border-t">
+          <p>This is a system generated statement from SalesTrack. No signature required.</p>
+        </div>
       </div>
     </div>
   );
