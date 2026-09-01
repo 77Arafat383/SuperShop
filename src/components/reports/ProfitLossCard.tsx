@@ -26,7 +26,7 @@ export const ProfitLossCard: React.FC<ProfitLossCardProps> = ({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-emerald-500" />
-          <span>Profit & Loss Statement (P&L)</span>
+          <span>Profit & Loss Statement</span>
         </h3>
         <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
           Margin: {profitMargin}%

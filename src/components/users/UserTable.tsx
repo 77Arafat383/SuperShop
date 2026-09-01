@@ -1,23 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Users, CheckCircle, XCircle, Shield, ArrowUpRight, 
-  Trash2, Search, Sparkles, Filter, AlertCircle, Clock 
+import {
+  Users, CheckCircle, XCircle, Shield, ArrowUpRight,
+  Trash2, Search, Sparkles, Filter, AlertCircle, Clock
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { User, UserRole, UserStatus } from '@/types';
 import { formatDate } from '@/lib/utils';
 
 export const UserTable: React.FC = () => {
-  const { 
-    users, 
-    currentUser, 
-    approveUser, 
-    rejectUser, 
-    updateUserRole, 
-    updateUserStatus, 
-    deleteUser 
+  const {
+    users,
+    currentUser,
+    approveUser,
+    rejectUser,
+    updateUserRole,
+    updateUserStatus,
+    deleteUser
   } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,9 +25,9 @@ export const UserTable: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('All');
 
   const pendingUsers = users.filter(u => u.status === 'Pending Approval');
-  
+
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
+    const matchesSearch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.phone?.includes(searchTerm);
@@ -58,58 +58,7 @@ export const UserTable: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Pending Approvals Callout Banner */}
-      {pendingUsers.length > 0 && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 shadow-sm animate-fade-in">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-xl bg-amber-500 text-white">
-              <Clock className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                Pending Registration Requests ({pendingUsers.length})
-              </h3>
-              <p className="text-xs text-amber-700 dark:text-amber-300">
-                These users signed up and requested role assignments. Review and approve or reject their access.
-              </p>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-            {pendingUsers.map(u => (
-              <div key={u.id} className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-amber-200 dark:border-amber-800/80 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-slate-900 dark:text-white">{u.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
-                      Requests: {u.requestedRole || u.role}
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">{u.email} • {u.phone}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Applied on: {formatDate(u.createdAt)}</div>
-                </div>
-
-                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    onClick={() => approveUser(u.id)}
-                    className="flex-1 py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition"
-                  >
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    <span>Approve ({u.requestedRole || u.role})</span>
-                  </button>
-                  <button
-                    onClick={() => rejectUser(u.id)}
-                    className="py-1.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-700 dark:text-slate-300 hover:text-red-600 text-xs font-semibold rounded-lg transition"
-                  >
-                    <XCircle className="w-3.5 h-3.5" />
-                    <span>Reject</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Filter and Search Bar */}
       <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">

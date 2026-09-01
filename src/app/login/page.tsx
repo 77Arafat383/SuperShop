@@ -190,13 +190,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800/60 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>Automatic Role Detection:</span>
-              <span className="text-blue-400 font-semibold">
-                {users.find(u => u.email.toLowerCase() === loginEmail.toLowerCase())?.role || 'Based on your assigned role'}
-              </span>
-            </div>
-
             <button
               type="submit"
               disabled={isSubmitting}

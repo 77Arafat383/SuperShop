@@ -35,3 +35,4 @@ src/lib/db/mockData.ts
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+

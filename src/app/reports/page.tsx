@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { 
-  BarChart3, Calendar, Printer, TrendingUp, 
+import {
+  BarChart3, Calendar, Printer, TrendingUp,
   Boxes, Truck, ShoppingCart, RotateCcw, Award
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
@@ -198,7 +198,7 @@ export default function ReportsPage() {
       {/* Hidden printable P&L area */}
       <div className="printable-receipt-area hidden print:block bg-white text-black p-8 font-sans max-w-2xl mx-auto space-y-6">
         <div className="text-center border-b pb-4">
-          <h1 className="text-xl font-bold uppercase tracking-wide">Profit & Loss (P&L) Statement</h1>
+          <h1 className="text-xl font-bold uppercase tracking-wide">Profit & Loss Statement</h1>
           <p className="text-xs text-slate-500">SalesTrack Business Analytics System</p>
           <p className="text-[10px] text-slate-400 mt-1">Generated: {new Date().toLocaleString()}</p>
         </div>
@@ -236,7 +236,7 @@ export default function ReportsPage() {
         </div>
 
         <div className="pt-12 text-center text-[10px] text-slate-400 border-t">
-          <p>This is a system generated statement from SalesTrack. No signature required.</p>
+          <p>This is a system generated statement from SalesTrack.</p>
         </div>
       </div>
     </div>

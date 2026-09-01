@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  X, Printer, Download, CheckCircle2, Building2, 
-  Barcode as BarcodeIcon, FileText, ShoppingBag, ArrowRight 
+import {
+  X, Printer, Download, CheckCircle2, Building2,
+  Barcode as BarcodeIcon, FileText, ShoppingBag, ArrowRight
 } from 'lucide-react';
 import { Sale } from '@/types';
 import { formatBDT, formatDate } from '@/lib/utils';
@@ -73,7 +73,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             <div className="max-w-[340px] mx-auto text-center space-y-3 font-mono text-xs">
               <div className="space-y-1">
                 <h2 className="text-base font-black uppercase tracking-tight">
-                  NSTU SUPER MART
+                  SALSETRACK
                 </h2>
                 <p className="text-[11px] text-gray-600 leading-tight">
                   CSTE Dept, NSTU Campus, Noakhali 3814<br />
@@ -180,8 +180,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             <div className="space-y-4 text-xs">
               <div className="flex justify-between items-start border-b pb-4">
                 <div>
-                  <h1 className="text-xl font-bold text-slate-900">TAX INVOICE / CASH MEMO</h1>
-                  <p className="text-xs text-gray-500">NSTU Sales & Inventory Tracking System</p>
+                  <h1 className="text-xl font-bold text-slate-900">INVOICE</h1>
+                  <p className="text-xs text-gray-500">Sales & Inventory Tracking System</p>
                   <p className="text-[11px] text-gray-600 mt-1">
                     Noakhali Science & Technology University<br />
                     Phone: +880 1812-345678 • VAT Reg: 001928374-0101
@@ -272,7 +272,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             onClick={onNewSale}
             className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-md shadow-blue-600/30 transition"
           >
-            <span>Next Order</span>
+            <span>Done</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
