@@ -22,7 +22,7 @@ interface DataContextType {
   metrics: DashboardMetrics;
 
   // Product Operations
-  addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => Product;
+  addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>, createdBy?: string) => Product;
   updateProduct: (id: string, product: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   getProductByBarcode: (barcode: string) => Product | undefined;
@@ -429,16 +429,74 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ----------------------------------------------------
   // Product Operations
   // ----------------------------------------------------
-  const addProduct = (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Product => {
+  const addProduct = (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>, createdBy?: string): Product => {
+    const requestedQty = Math.max(1, Number(productData.stockQuantity || 10));
+
+    // Product is created with initial stockQuantity 0 so it does NOT display on POS until received from Purchase Manager
     const newProduct: Product = {
       ...productData,
       id: `prod_${Date.now()}`,
+      stockQuantity: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+
     const updated = [newProduct, ...products];
     saveProducts(updated);
     sendJson('/api/products', 'POST', newProduct);
+
+    // Automatically issue a Purchase Order Requisition to Purchase Manager for the assigned supplier
+    const supplier = suppliers.find(s => s.id === productData.supplierId) || suppliers[0];
+    if (supplier) {
+      const unitCost = Number(newProduct.purchasePrice || 0);
+      const totalAmount = unitCost * requestedQty;
+      const poNumber = generatePONumber();
+      const poId = `po_${Date.now()}`;
+
+      const poItems = [{
+        productId: newProduct.id,
+        productName: newProduct.name,
+        sku: newProduct.sku,
+        unitCost,
+        quantity: requestedQty,
+        subtotal: totalAmount,
+      }];
+
+      const newPO: PurchaseOrder = {
+        id: poId,
+        poNumber,
+        supplierId: supplier.id,
+        supplierName: supplier.name,
+        supplierPhone: supplier.phone,
+        items: poItems,
+        totalAmount,
+        paidAmount: 0,
+        dueAmount: totalAmount,
+        status: 'Requested',
+        paymentStatus: 'Due',
+        orderDate: new Date().toISOString(),
+        createdBy: createdBy || 'Inventory Manager',
+        notes: `Purchase Requisition for newly defined product: ${newProduct.name}`,
+        paymentHistory: [],
+      };
+
+      savePurchases([newPO, ...purchases]);
+
+      // Update supplier ledger
+      const updatedSuppliers = suppliers.map(s => {
+        if (s.id === supplier.id) {
+          return {
+            ...s,
+            totalPurchased: s.totalPurchased + totalAmount,
+            totalDue: s.totalDue + totalAmount,
+          };
+        }
+        return s;
+      });
+      saveSuppliers(updatedSuppliers);
+      sendJson('/api/purchases', 'POST', newPO).then(() => loadBackendData());
+    }
+
     return newProduct;
   };
 

@@ -173,16 +173,21 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                       </td>
 
                       <td className="py-3 px-4 text-center">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                          p.stockQuantity <= 0
-                            ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
-                            : isLow
-                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                        }`}>
-                          {isLow && <AlertTriangle className="w-3 h-3" />}
-                          {p.stockQuantity} {p.unit}
-                        </span>
+                        {p.stockQuantity <= 0 ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300/40">
+                            <AlertTriangle className="w-3 h-3" />
+                            Awaiting Purchase (0 {p.unit})
+                          </span>
+                        ) : (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                            isLow
+                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                          }`}>
+                            {isLow && <AlertTriangle className="w-3 h-3" />}
+                            {p.stockQuantity} {p.unit}
+                          </span>
+                        )}
                       </td>
 
                       <td className="py-3 px-4 text-right">

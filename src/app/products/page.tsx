@@ -5,10 +5,12 @@ import { ProductTable } from '@/components/products/ProductTable';
 import { ProductModal } from '@/components/products/ProductModal';
 import { BarcodeGeneratorModal } from '@/components/products/BarcodeGeneratorModal';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 import { Product } from '@/types';
 
 export default function ProductsPage() {
   const { products, categories, suppliers, addProduct, updateProduct, deleteProduct } = useData();
+  const { currentUser } = useAuth();
 
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -28,7 +30,8 @@ export default function ProductsPage() {
     if (editingProduct) {
       updateProduct(editingProduct.id, productData);
     } else {
-      addProduct(productData);
+      addProduct(productData, currentUser?.name ? `${currentUser.name} (${currentUser.role})` : 'Inventory Manager');
+      alert('Product created! Purchase Requisition PO sent to Purchase Manager for supplier order fulfillment.');
     }
   };
 

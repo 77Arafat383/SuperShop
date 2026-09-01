@@ -134,10 +134,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Product Title / Name *
+                Product Title*
               </label>
               <input
                 type="text"
@@ -151,7 +153,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Product Image / Photo
+                Product Image
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -284,7 +286,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Initial Stock Quantity
+                {editingProduct ? 'Current Stock Quantity' : 'Initial Requisition Quantity (PO Units)'}
               </label>
               <input
                 type="number"
