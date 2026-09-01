@@ -20,6 +20,8 @@ export default function ReturnsPage() {
   const [reason, setReason] = useState('Customer changed mind / Defective seal');
 
   const selectedSale = sales.find(s => s.id === selectedSaleId);
+  const selectedSaleItem = selectedSale?.items.find(item => item.productId === selectedProductId);
+  const maxReturnQuantity = selectedSaleItem?.quantity ?? 1;
 
   React.useEffect(() => {
     if (!selectedSaleId && sales.length > 0) {
@@ -37,6 +39,11 @@ export default function ReturnsPage() {
     e.preventDefault();
     if (!selectedSale || !selectedProductId) {
       alert('Please select a valid sale and product to return');
+      return;
+    }
+
+    if (quantity > maxReturnQuantity) {
+      alert(`Return quantity cannot exceed purchased quantity (${maxReturnQuantity}).`);
       return;
     }
 
@@ -245,11 +252,17 @@ export default function ReturnsPage() {
                 <input
                   type="number"
                   min="1"
+                  max={maxReturnQuantity}
                   required
                   value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  onChange={(e) => setQuantity(Math.min(maxReturnQuantity, Math.max(1, Number(e.target.value))))}
                   className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white"
                 />
+                {selectedSaleItem && (
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Purchased quantity: {maxReturnQuantity} pcs
+                  </p>
+                )}
               </div>
 
               <div>
