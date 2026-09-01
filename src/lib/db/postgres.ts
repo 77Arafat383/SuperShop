@@ -1,11 +1,26 @@
 import { Pool, QueryResult, QueryResultRow } from 'pg';
 
 // Support PostgreSQL connection strings from Vercel Postgres, Neon, Supabase, or standard PG
-const connectionString = 
+const rawConnectionString = 
   process.env.POSTGRES_URL || 
   process.env.DATABASE_URL || 
   process.env.POSTGRES_PRISMA_URL ||
   '';
+
+function normalizeConnectionString(value: string): string {
+  const match = value.match(/^((?:postgres|postgresql):\/\/[^:/?#]+:)([^@]*)(@.+)$/);
+  if (!match || !match[2]) {
+    return value;
+  }
+
+  try {
+    return `${match[1]}${encodeURIComponent(decodeURIComponent(match[2]))}${match[3]}`;
+  } catch {
+    return `${match[1]}${encodeURIComponent(match[2])}${match[3]}`;
+  }
+}
+
+const connectionString = normalizeConnectionString(rawConnectionString);
 
 let pool: Pool | null = null;
 
