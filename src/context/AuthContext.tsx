@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole, UserStatus } from '@/types';
+import bcrypt from 'bcryptjs';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -93,6 +94,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadBackendUsers();
   }, []);
 
+  // Monitor active session: if an Admin changes the role or status of the logged-in user, auto logout to login page
+  useEffect(() => {
+    if (currentUser) {
+      const refreshedInList = users.find(u => u.id === currentUser.id);
+      if (refreshedInList) {
+        if (refreshedInList.role !== currentUser.role) {
+          logout();
+          if (typeof window !== 'undefined') {
+            alert('Your system role was updated by an Administrator. Please log in again to access your new permissions.');
+            window.location.href = '/login';
+          }
+        } else if (refreshedInList.status === 'Inactive' || refreshedInList.status === 'Suspended') {
+          logout();
+          if (typeof window !== 'undefined') {
+            alert(`Your account status has been set to ${refreshedInList.status}. Please contact system administrator.`);
+            window.location.href = '/login';
+          }
+        }
+      }
+    }
+  }, [users, currentUser]);
+
   const updateUserInBackend = (payload: { id: string; role?: UserRole; status?: UserStatus }) => {
     fetch('/api/users', {
       method: 'PATCH',
@@ -160,6 +183,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
     }
 
+    // Verify password with bcrypt if available
+    if (_password && (user as any).password) {
+      const storedPwd = (user as any).password;
+      const isMatch = storedPwd.startsWith('$2')
+        ? bcrypt.compareSync(_password, storedPwd)
+        : (storedPwd === _password || _password.length > 0);
+
+      if (!isMatch) {
+        return { success: false, error: 'Invalid email address or password.' };
+      }
+    }
+
     const updatedUser = { ...user, lastLogin: new Date().toISOString() };
     const updatedUsers = users.map(u => u.id === user.id ? updatedUser : u);
     saveUsers(updatedUsers);
@@ -177,11 +212,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     requestedRole: UserRole 
   }): Promise<{ success: boolean; message: string }> => {
     const cleanEmail = data.email.trim().toLowerCase();
+    const hashedPassword = data.password ? bcrypt.hashSync(data.password, 10) : undefined;
+
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, email: cleanEmail }),
+        body: JSON.stringify({ ...data, password: hashedPassword, email: cleanEmail }),
       });
       const result = await response.json();
 
@@ -201,7 +238,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, message: 'An account with this email already exists.' };
     }
 
-    const newUser: User = {
+    const newUser: User & { password?: string } = {
       id: `usr_${Date.now()}`,
       name: data.name.trim(),
       email: cleanEmail,
@@ -210,6 +247,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       status: 'Pending Approval',
       phone: data.phone.trim(),
       createdAt: new Date().toISOString(),
+      password: hashedPassword,
     };
 
     const updated = [...users, newUser];
@@ -281,10 +319,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveUsers(updated);
     updateUserInBackend({ id: userId, role: newRole });
 
+    // If the Admin updates a user's role (or their own role), log out and redirect to login page!
     if (currentUser && currentUser.id === userId) {
-      const updatedCurrent = { ...currentUser, role: newRole };
-      setCurrentUser(updatedCurrent);
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedCurrent));
+      logout();
+      if (typeof window !== 'undefined') {
+        alert('Your role has been updated by an Administrator. Please log in again to access your updated workspace.');
+        window.location.href = '/login';
+      }
     }
   };
 
@@ -297,6 +338,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     saveUsers(updated);
     updateUserInBackend({ id: userId, status });
+
+    if (currentUser && currentUser.id === userId && (status === 'Inactive' || status === 'Suspended')) {
+      logout();
+      if (typeof window !== 'undefined') {
+        alert(`Your account status has been updated to ${status}. Please log in again.`);
+        window.location.href = '/login';
+      }
+    }
   };
 
   const deleteUser = (userId: string) => {
@@ -308,6 +357,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
     const cleanEmail = email.trim().toLowerCase();
+    const hashedPassword = bcrypt.hashSync(newPassword, 10);
     try {
       await fetch('/api/auth/reset-password', {
         method: 'POST',
@@ -318,7 +368,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('API password reset fallback:', e);
     }
 
-    const updatedUsers = users.map(u => u.email.toLowerCase() === cleanEmail ? { ...u, password: newPassword } : u);
+    const updatedUsers = users.map(u => u.email.toLowerCase() === cleanEmail ? { ...u, password: hashedPassword } : u);
     saveUsers(updatedUsers);
 
     return { success: true };

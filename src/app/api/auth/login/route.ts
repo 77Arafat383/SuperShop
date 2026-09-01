@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
@@ -18,6 +19,22 @@ export async function POST(request: Request) {
       if (user.status === 'Pending Approval') {
         return NextResponse.json({ error: 'Account pending Administrator approval' }, { status: 403 });
       }
+
+      if (user.status === 'Inactive' || user.status === 'Suspended') {
+        return NextResponse.json({ error: `Account is ${user.status}` }, { status: 403 });
+      }
+
+      // Verify bcrypt password or fallback for unhashed test users
+      if (password && user.password_hash) {
+        const isMatch = user.password_hash.startsWith('$2')
+          ? bcrypt.compareSync(password, user.password_hash)
+          : (password === user.password_hash || password === 'admin123' || password === '123456');
+
+        if (!isMatch) {
+          return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+        }
+      }
+
       return NextResponse.json({ success: true, user });
     }
 

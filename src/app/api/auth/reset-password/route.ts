@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
@@ -9,10 +10,11 @@ export async function POST(request: Request) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const passwordHash = bcrypt.hashSync(newPassword, 10);
 
     await query(
       `UPDATE users SET password_hash = $1 WHERE LOWER(email) = $2`,
-      [newPassword, cleanEmail]
+      [passwordHash, cleanEmail]
     );
 
     return NextResponse.json({ success: true, message: 'Password updated successfully' });
