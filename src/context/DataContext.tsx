@@ -285,7 +285,7 @@ const mapReturnFromApi = (productReturn: any): ProductReturn => ({
 });
 
 const sendJson = (url: string, method: string, body?: unknown) => {
-  fetch(url, {
+  return fetch(url, {
     method,
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,
@@ -300,6 +300,60 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [sales, setSales] = useState<Sale[]>([]);
   const [adjustments, setAdjustments] = useState<StockAdjustment[]>([]);
   const [returns, setReturns] = useState<ProductReturn[]>([]);
+
+  const loadBackendData = async () => {
+    try {
+      const [productsResponse, suppliersResponse, categoriesResponse, purchasesResponse, salesResponse, adjustmentsResponse, returnsResponse] = await Promise.all([
+        fetch('/api/products', { cache: 'no-store' }),
+        fetch('/api/suppliers', { cache: 'no-store' }),
+        fetch('/api/categories', { cache: 'no-store' }),
+        fetch('/api/purchases', { cache: 'no-store' }),
+        fetch('/api/sales', { cache: 'no-store' }),
+        fetch('/api/adjustments', { cache: 'no-store' }),
+        fetch('/api/returns', { cache: 'no-store' }),
+      ]);
+
+      if (!productsResponse.ok || !suppliersResponse.ok) return;
+
+      const [productsResult, suppliersResult, categoriesResult, purchasesResult, salesResult, adjustmentsResult, returnsResult] = await Promise.all([
+        productsResponse.json(),
+        suppliersResponse.json(),
+        categoriesResponse.ok ? categoriesResponse.json() : Promise.resolve({ categories: [] }),
+        purchasesResponse.ok ? purchasesResponse.json() : Promise.resolve({ purchases: [] }),
+        salesResponse.ok ? salesResponse.json() : Promise.resolve({ sales: [] }),
+        adjustmentsResponse.ok ? adjustmentsResponse.json() : Promise.resolve({ adjustments: [] }),
+        returnsResponse.ok ? returnsResponse.json() : Promise.resolve({ returns: [] }),
+      ]);
+
+      const apiSuppliers: Supplier[] = (suppliersResult.suppliers ?? []).map(mapSupplierFromApi);
+      const suppliersById = new Map<string, Supplier>(apiSuppliers.map(supplier => [supplier.id, supplier]));
+      const apiProducts = (productsResult.products ?? []).map((product: any) => mapProductFromApi(product, suppliersById));
+      const apiCategories = (categoriesResult.categories ?? []).length > 0
+        ? (categoriesResult.categories ?? []).map(mapCategoryFromApi)
+        : categoriesFromProducts(apiProducts);
+      const apiPurchases = (purchasesResult.purchases ?? []).map(mapPurchaseFromApi);
+      const apiSales = (salesResult.sales ?? []).map(mapSaleFromApi);
+      const apiAdjustments = (adjustmentsResult.adjustments ?? []).map(mapAdjustmentFromApi);
+      const apiReturns = (returnsResult.returns ?? []).map(mapReturnFromApi);
+
+      setProducts(apiProducts);
+      setSuppliers(apiSuppliers);
+      setCategories(apiCategories);
+      setPurchases(apiPurchases);
+      setSales(apiSales);
+      setAdjustments(apiAdjustments);
+      setReturns(apiReturns);
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(apiProducts));
+      localStorage.setItem(STORAGE_KEYS.SUPPLIERS, JSON.stringify(apiSuppliers));
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(apiCategories));
+      localStorage.setItem(STORAGE_KEYS.PURCHASES, JSON.stringify(apiPurchases));
+      localStorage.setItem(STORAGE_KEYS.SALES, JSON.stringify(apiSales));
+      localStorage.setItem(STORAGE_KEYS.ADJUSTMENTS, JSON.stringify(apiAdjustments));
+      localStorage.setItem(STORAGE_KEYS.RETURNS, JSON.stringify(apiReturns));
+    } catch (error) {
+      console.error('Error hydrating data from backend API:', error);
+    }
+  };
 
   // Load initial state
   useEffect(() => {
@@ -328,60 +382,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAdjustments([]);
       setReturns([]);
     }
-
-    const loadBackendData = async () => {
-      try {
-        const [productsResponse, suppliersResponse, categoriesResponse, purchasesResponse, salesResponse, adjustmentsResponse, returnsResponse] = await Promise.all([
-          fetch('/api/products', { cache: 'no-store' }),
-          fetch('/api/suppliers', { cache: 'no-store' }),
-          fetch('/api/categories', { cache: 'no-store' }),
-          fetch('/api/purchases', { cache: 'no-store' }),
-          fetch('/api/sales', { cache: 'no-store' }),
-          fetch('/api/adjustments', { cache: 'no-store' }),
-          fetch('/api/returns', { cache: 'no-store' }),
-        ]);
-
-        if (!productsResponse.ok || !suppliersResponse.ok) return;
-
-        const [productsResult, suppliersResult, categoriesResult, purchasesResult, salesResult, adjustmentsResult, returnsResult] = await Promise.all([
-          productsResponse.json(),
-          suppliersResponse.json(),
-          categoriesResponse.ok ? categoriesResponse.json() : Promise.resolve({ categories: [] }),
-          purchasesResponse.ok ? purchasesResponse.json() : Promise.resolve({ purchases: [] }),
-          salesResponse.ok ? salesResponse.json() : Promise.resolve({ sales: [] }),
-          adjustmentsResponse.ok ? adjustmentsResponse.json() : Promise.resolve({ adjustments: [] }),
-          returnsResponse.ok ? returnsResponse.json() : Promise.resolve({ returns: [] }),
-        ]);
-
-        const apiSuppliers: Supplier[] = (suppliersResult.suppliers ?? []).map(mapSupplierFromApi);
-        const suppliersById = new Map<string, Supplier>(apiSuppliers.map(supplier => [supplier.id, supplier]));
-        const apiProducts = (productsResult.products ?? []).map((product: any) => mapProductFromApi(product, suppliersById));
-        const apiCategories = (categoriesResult.categories ?? []).length > 0
-          ? (categoriesResult.categories ?? []).map(mapCategoryFromApi)
-          : categoriesFromProducts(apiProducts);
-        const apiPurchases = (purchasesResult.purchases ?? []).map(mapPurchaseFromApi);
-        const apiSales = (salesResult.sales ?? []).map(mapSaleFromApi);
-        const apiAdjustments = (adjustmentsResult.adjustments ?? []).map(mapAdjustmentFromApi);
-        const apiReturns = (returnsResult.returns ?? []).map(mapReturnFromApi);
-
-        setProducts(apiProducts);
-        setSuppliers(apiSuppliers);
-        setCategories(apiCategories);
-        setPurchases(apiPurchases);
-        setSales(apiSales);
-        setAdjustments(apiAdjustments);
-        setReturns(apiReturns);
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(apiProducts));
-        localStorage.setItem(STORAGE_KEYS.SUPPLIERS, JSON.stringify(apiSuppliers));
-        localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(apiCategories));
-        localStorage.setItem(STORAGE_KEYS.PURCHASES, JSON.stringify(apiPurchases));
-        localStorage.setItem(STORAGE_KEYS.SALES, JSON.stringify(apiSales));
-        localStorage.setItem(STORAGE_KEYS.ADJUSTMENTS, JSON.stringify(apiAdjustments));
-        localStorage.setItem(STORAGE_KEYS.RETURNS, JSON.stringify(apiReturns));
-      } catch (error) {
-        console.error('Error hydrating data from backend API:', error);
-      }
-    };
 
     loadBackendData();
   }, []);
@@ -602,7 +602,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return s;
     });
     saveSuppliers(updatedSuppliers);
-    sendJson('/api/purchases', 'POST', newPO);
+    sendJson('/api/purchases', 'POST', newPO).then(() => loadBackendData());
 
     return { po: newPO, receipt };
   };
@@ -652,8 +652,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sendJson('/api/purchases', 'PATCH', {
       action: 'receive',
       purchase: { ...po, status: 'Received', receivedDate: updatedPurchases.find(p => p.id === poId)?.receivedDate },
-    });
-    newAdjustments.forEach(adjustment => sendJson('/api/adjustments', 'POST', adjustment));
+    }).then(() => loadBackendData());
+    newAdjustments.forEach(adjustment => sendJson('/api/adjustments', 'POST', adjustment).then(() => loadBackendData()));
   };
 
   const recordSupplierPayment = (data: {
@@ -723,7 +723,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       dueAmount: remainingDue,
       paymentStatus,
       payment: receipt,
-    });
+    }).then(() => loadBackendData());
 
     return receipt;
   };
@@ -827,8 +827,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveProducts(updatedProducts);
     saveAdjustments([...newAdjustments, ...adjustments]);
     saveSales([newSale, ...sales]);
-    sendJson('/api/sales', 'POST', newSale);
-    newAdjustments.forEach(adjustment => sendJson('/api/adjustments', 'POST', adjustment));
+    sendJson('/api/sales', 'POST', newSale).then(() => loadBackendData());
+    newAdjustments.forEach(adjustment => sendJson('/api/adjustments', 'POST', adjustment).then(() => loadBackendData()));
 
     return newSale;
   };
@@ -873,7 +873,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     updateProduct(prod.id, { stockQuantity: qtyAfter });
     saveAdjustments([adjustmentRecord, ...adjustments]);
-    sendJson('/api/adjustments', 'POST', adjustmentRecord);
+    sendJson('/api/adjustments', 'POST', adjustmentRecord).then(() => loadBackendData());
   };
 
   // ----------------------------------------------------
@@ -927,11 +927,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         adjustedBy: data.processedBy,
       };
       saveAdjustments([returnAdjustment, ...adjustments]);
-      sendJson('/api/adjustments', 'POST', returnAdjustment);
+      sendJson('/api/adjustments', 'POST', returnAdjustment).then(() => loadBackendData());
     }
 
     saveReturns([retRecord, ...returns]);
-    sendJson('/api/returns', 'POST', retRecord);
+    sendJson('/api/returns', 'POST', retRecord).then(() => loadBackendData());
     return retRecord;
   };
 

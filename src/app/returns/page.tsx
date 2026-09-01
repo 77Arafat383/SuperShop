@@ -22,6 +22,12 @@ export default function ReturnsPage() {
   const selectedSale = sales.find(s => s.id === selectedSaleId);
 
   React.useEffect(() => {
+    if (!selectedSaleId && sales.length > 0) {
+      setSelectedSaleId(sales[0].id);
+    }
+  }, [sales, selectedSaleId]);
+
+  React.useEffect(() => {
     if (selectedSale && selectedSale.items.length > 0) {
       setSelectedProductId(selectedSale.items[0].productId);
     }
