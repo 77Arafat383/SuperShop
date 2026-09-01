@@ -135,6 +135,14 @@ const mapSupplierFromApi = (supplier: any): Supplier => ({
   createdAt: supplier.createdAt ?? supplier.created_at ?? new Date().toISOString(),
 });
 
+const mapCategoryFromApi = (category: any): Category => ({
+  id: category.id,
+  name: category.name,
+  description: category.description ?? undefined,
+  icon: category.icon ?? undefined,
+  productCount: toNumber(category.productCount ?? category.product_count),
+});
+
 const mapProductFromApi = (product: any, suppliersById: Map<string, Supplier>): Product => {
   const categoryId = product.categoryId ?? product.category_id ?? '';
   const supplierId = product.supplierId ?? product.supplier_id ?? '';
@@ -173,6 +181,115 @@ const categoriesFromProducts = (products: Product[]): Category[] => {
     });
   });
   return Array.from(byId.values());
+};
+
+const mapPurchasePaymentFromApi = (payment: any): PurchasePaymentRecord => ({
+  id: payment.id,
+  paymentDate: payment.paymentDate ?? payment.payment_date ?? new Date().toISOString(),
+  amountPaid: toNumber(payment.amountPaid ?? payment.amount_paid),
+  previousDue: toNumber(payment.previousDue ?? payment.previous_due),
+  remainingDue: toNumber(payment.remainingDue ?? payment.remaining_due),
+  paymentMethod: payment.paymentMethod ?? payment.payment_method,
+  transactionRef: payment.transactionRef ?? payment.transaction_ref ?? '',
+  receiptNumber: payment.receiptNumber ?? payment.receipt_number ?? '',
+  notes: payment.notes ?? undefined,
+  recordedBy: payment.recordedBy ?? payment.recorded_by ?? '',
+});
+
+const mapPurchaseFromApi = (purchase: any): PurchaseOrder => ({
+  id: purchase.id,
+  poNumber: purchase.poNumber ?? purchase.po_number,
+  supplierId: purchase.supplierId ?? purchase.supplier_id,
+  supplierName: purchase.supplierName ?? purchase.supplier_name,
+  supplierPhone: purchase.supplierPhone ?? purchase.supplier_phone ?? '',
+  items: (purchase.items ?? []).map((item: any) => ({
+    productId: item.productId ?? item.product_id,
+    productName: item.productName ?? item.product_name,
+    sku: item.sku ?? '',
+    unitCost: toNumber(item.unitCost ?? item.unit_cost),
+    quantity: toNumber(item.quantity),
+    subtotal: toNumber(item.subtotal),
+  })),
+  totalAmount: toNumber(purchase.totalAmount ?? purchase.total_amount),
+  paidAmount: toNumber(purchase.paidAmount ?? purchase.paid_amount),
+  dueAmount: toNumber(purchase.dueAmount ?? purchase.due_amount),
+  status: purchase.status ?? 'Requested',
+  paymentStatus: purchase.paymentStatus ?? purchase.payment_status ?? 'Due',
+  orderDate: purchase.orderDate ?? purchase.order_date ?? new Date().toISOString(),
+  receivedDate: purchase.receivedDate ?? purchase.received_date ?? undefined,
+  createdBy: purchase.createdBy ?? purchase.created_by ?? '',
+  notes: purchase.notes ?? undefined,
+  paymentHistory: (purchase.paymentHistory ?? purchase.payment_history ?? []).map(mapPurchasePaymentFromApi),
+});
+
+const mapSaleFromApi = (sale: any): Sale => ({
+  id: sale.id,
+  invoiceNumber: sale.invoiceNumber ?? sale.invoice_number,
+  cashierId: sale.cashierId ?? sale.cashier_id ?? '',
+  cashierName: sale.cashierName ?? sale.cashier_name ?? '',
+  customerName: sale.customerName ?? sale.customer_name ?? 'Walk-in Customer',
+  customerPhone: sale.customerPhone ?? sale.customer_phone ?? undefined,
+  items: (sale.items ?? []).map((item: any) => ({
+    productId: item.productId ?? item.product_id,
+    productName: item.productName ?? item.product_name,
+    barcode: item.barcode ?? '',
+    sku: item.sku ?? '',
+    unitPrice: toNumber(item.unitPrice ?? item.unit_price),
+    discount: toNumber(item.discount),
+    quantity: toNumber(item.quantity),
+    subtotal: toNumber(item.subtotal),
+    costPrice: toNumber(item.costPrice ?? item.cost_price),
+  })),
+  subtotal: toNumber(sale.subtotal),
+  discountTotal: toNumber(sale.discountTotal ?? sale.discount_total),
+  taxRate: toNumber(sale.taxRate ?? sale.tax_rate),
+  taxAmount: toNumber(sale.taxAmount ?? sale.tax_amount),
+  totalAmount: toNumber(sale.totalAmount ?? sale.total_amount),
+  paidAmount: toNumber(sale.paidAmount ?? sale.paid_amount),
+  changeAmount: toNumber(sale.changeAmount ?? sale.change_amount),
+  paymentMethod: sale.paymentMethod ?? sale.payment_method,
+  paymentDetails: sale.paymentDetails ?? sale.payment_details ?? { method: sale.paymentMethod ?? sale.payment_method },
+  saleDate: sale.saleDate ?? sale.sale_date ?? new Date().toISOString(),
+  status: sale.status ?? 'Completed',
+  notes: sale.notes ?? undefined,
+});
+
+const mapAdjustmentFromApi = (adjustment: any): StockAdjustment => ({
+  id: adjustment.id,
+  productId: adjustment.productId ?? adjustment.product_id,
+  productName: adjustment.productName ?? adjustment.product_name,
+  sku: adjustment.sku ?? '',
+  adjustmentType: adjustment.adjustmentType ?? adjustment.adjustment_type,
+  quantityBefore: toNumber(adjustment.quantityBefore ?? adjustment.quantity_before),
+  quantityChange: toNumber(adjustment.quantityChange ?? adjustment.quantity_change),
+  quantityAfter: toNumber(adjustment.quantityAfter ?? adjustment.quantity_after),
+  reason: adjustment.reason ?? '',
+  date: adjustment.date ?? new Date().toISOString(),
+  adjustedBy: adjustment.adjustedBy ?? adjustment.adjusted_by ?? '',
+});
+
+const mapReturnFromApi = (productReturn: any): ProductReturn => ({
+  id: productReturn.id,
+  returnNumber: productReturn.returnNumber ?? productReturn.return_number,
+  saleId: productReturn.saleId ?? productReturn.sale_id,
+  invoiceNumber: productReturn.invoiceNumber ?? productReturn.invoice_number,
+  productId: productReturn.productId ?? productReturn.product_id,
+  productName: productReturn.productName ?? productReturn.product_name,
+  quantity: toNumber(productReturn.quantity),
+  unitPrice: toNumber(productReturn.unitPrice ?? productReturn.unit_price),
+  refundAmount: toNumber(productReturn.refundAmount ?? productReturn.refund_amount),
+  reason: productReturn.reason ?? '',
+  returnDate: productReturn.returnDate ?? productReturn.return_date ?? new Date().toISOString(),
+  processedBy: productReturn.processedBy ?? productReturn.processed_by ?? '',
+  status: productReturn.status ?? 'Approved',
+});
+
+const sendJson = (url: string, method: string, body?: unknown) => {
+  fetch(url, {
+    method,
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  }).catch(error => console.error(`Error calling ${url}:`, error));
 };
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -214,29 +331,53 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const loadBackendData = async () => {
       try {
-        const [productsResponse, suppliersResponse] = await Promise.all([
+        const [productsResponse, suppliersResponse, categoriesResponse, purchasesResponse, salesResponse, adjustmentsResponse, returnsResponse] = await Promise.all([
           fetch('/api/products', { cache: 'no-store' }),
           fetch('/api/suppliers', { cache: 'no-store' }),
+          fetch('/api/categories', { cache: 'no-store' }),
+          fetch('/api/purchases', { cache: 'no-store' }),
+          fetch('/api/sales', { cache: 'no-store' }),
+          fetch('/api/adjustments', { cache: 'no-store' }),
+          fetch('/api/returns', { cache: 'no-store' }),
         ]);
 
         if (!productsResponse.ok || !suppliersResponse.ok) return;
 
-        const [productsResult, suppliersResult] = await Promise.all([
+        const [productsResult, suppliersResult, categoriesResult, purchasesResult, salesResult, adjustmentsResult, returnsResult] = await Promise.all([
           productsResponse.json(),
           suppliersResponse.json(),
+          categoriesResponse.ok ? categoriesResponse.json() : Promise.resolve({ categories: [] }),
+          purchasesResponse.ok ? purchasesResponse.json() : Promise.resolve({ purchases: [] }),
+          salesResponse.ok ? salesResponse.json() : Promise.resolve({ sales: [] }),
+          adjustmentsResponse.ok ? adjustmentsResponse.json() : Promise.resolve({ adjustments: [] }),
+          returnsResponse.ok ? returnsResponse.json() : Promise.resolve({ returns: [] }),
         ]);
 
         const apiSuppliers: Supplier[] = (suppliersResult.suppliers ?? []).map(mapSupplierFromApi);
         const suppliersById = new Map<string, Supplier>(apiSuppliers.map(supplier => [supplier.id, supplier]));
         const apiProducts = (productsResult.products ?? []).map((product: any) => mapProductFromApi(product, suppliersById));
-        const apiCategories = categoriesFromProducts(apiProducts);
+        const apiCategories = (categoriesResult.categories ?? []).length > 0
+          ? (categoriesResult.categories ?? []).map(mapCategoryFromApi)
+          : categoriesFromProducts(apiProducts);
+        const apiPurchases = (purchasesResult.purchases ?? []).map(mapPurchaseFromApi);
+        const apiSales = (salesResult.sales ?? []).map(mapSaleFromApi);
+        const apiAdjustments = (adjustmentsResult.adjustments ?? []).map(mapAdjustmentFromApi);
+        const apiReturns = (returnsResult.returns ?? []).map(mapReturnFromApi);
 
         setProducts(apiProducts);
         setSuppliers(apiSuppliers);
         setCategories(apiCategories);
+        setPurchases(apiPurchases);
+        setSales(apiSales);
+        setAdjustments(apiAdjustments);
+        setReturns(apiReturns);
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(apiProducts));
         localStorage.setItem(STORAGE_KEYS.SUPPLIERS, JSON.stringify(apiSuppliers));
         localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(apiCategories));
+        localStorage.setItem(STORAGE_KEYS.PURCHASES, JSON.stringify(apiPurchases));
+        localStorage.setItem(STORAGE_KEYS.SALES, JSON.stringify(apiSales));
+        localStorage.setItem(STORAGE_KEYS.ADJUSTMENTS, JSON.stringify(apiAdjustments));
+        localStorage.setItem(STORAGE_KEYS.RETURNS, JSON.stringify(apiReturns));
       } catch (error) {
         console.error('Error hydrating data from backend API:', error);
       }
@@ -293,11 +434,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     const updated = [newProduct, ...products];
     saveProducts(updated);
-    fetch('/api/products', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newProduct),
-    }).catch(error => console.error('Error saving product to backend API:', error));
+    sendJson('/api/products', 'POST', newProduct);
     return newProduct;
   };
 
@@ -306,11 +443,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       p.id === id ? { ...p, ...productUpdates, updatedAt: new Date().toISOString() } : p
     );
     saveProducts(updated);
+    const product = updated.find(p => p.id === id);
+    if (product) sendJson('/api/products', 'PATCH', product);
   };
 
   const deleteProduct = (id: string) => {
     const updated = products.filter(p => p.id !== id);
     saveProducts(updated);
+    sendJson(`/api/products?id=${encodeURIComponent(id)}`, 'DELETE');
   };
 
   const getProductByBarcode = (barcode: string) => {
@@ -328,14 +468,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       productCount: 0,
     };
     saveCategories([...categories, newCat]);
+    sendJson('/api/categories', 'POST', newCat);
   };
 
   const updateCategory = (id: string, updates: Partial<Category>) => {
-    saveCategories(categories.map(c => c.id === id ? { ...c, ...updates } : c));
+    const updated = categories.map(c => c.id === id ? { ...c, ...updates } : c);
+    saveCategories(updated);
+    const category = updated.find(c => c.id === id);
+    if (category) sendJson('/api/categories', 'PATCH', category);
   };
 
   const deleteCategory = (id: string) => {
     saveCategories(categories.filter(c => c.id !== id));
+    sendJson(`/api/categories?id=${encodeURIComponent(id)}`, 'DELETE');
   };
 
   // ----------------------------------------------------
@@ -351,15 +496,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createdAt: new Date().toISOString(),
     };
     saveSuppliers([...suppliers, newSupplier]);
+    sendJson('/api/suppliers', 'POST', newSupplier);
     return newSupplier;
   };
 
   const updateSupplier = (id: string, updates: Partial<Supplier>) => {
-    saveSuppliers(suppliers.map(s => s.id === id ? { ...s, ...updates } : s));
+    const updated = suppliers.map(s => s.id === id ? { ...s, ...updates } : s);
+    saveSuppliers(updated);
+    const supplier = updated.find(s => s.id === id);
+    if (supplier) sendJson('/api/suppliers', 'PATCH', supplier);
   };
 
   const deleteSupplier = (id: string) => {
     saveSuppliers(suppliers.filter(s => s.id !== id));
+    sendJson(`/api/suppliers?id=${encodeURIComponent(id)}`, 'DELETE');
   };
 
   // ----------------------------------------------------
@@ -452,6 +602,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return s;
     });
     saveSuppliers(updatedSuppliers);
+    sendJson('/api/purchases', 'POST', newPO);
 
     return { po: newPO, receipt };
   };
@@ -498,6 +649,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     saveProducts(updatedProducts);
     saveAdjustments([...newAdjustments, ...adjustments]);
+    sendJson('/api/purchases', 'PATCH', {
+      action: 'receive',
+      purchase: { ...po, status: 'Received', receivedDate: updatedPurchases.find(p => p.id === poId)?.receivedDate },
+    });
+    newAdjustments.forEach(adjustment => sendJson('/api/adjustments', 'POST', adjustment));
   };
 
   const recordSupplierPayment = (data: {
@@ -559,6 +715,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return s;
     });
     saveSuppliers(updatedSuppliers);
+    sendJson('/api/purchases', 'PATCH', {
+      action: 'payment',
+      purchaseId: po.id,
+      supplierId: po.supplierId,
+      paidAmount: newTotalPaid,
+      dueAmount: remainingDue,
+      paymentStatus,
+      payment: receipt,
+    });
 
     return receipt;
   };
@@ -662,6 +827,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveProducts(updatedProducts);
     saveAdjustments([...newAdjustments, ...adjustments]);
     saveSales([newSale, ...sales]);
+    sendJson('/api/sales', 'POST', newSale);
+    newAdjustments.forEach(adjustment => sendJson('/api/adjustments', 'POST', adjustment));
 
     return newSale;
   };
@@ -706,6 +873,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     updateProduct(prod.id, { stockQuantity: qtyAfter });
     saveAdjustments([adjustmentRecord, ...adjustments]);
+    sendJson('/api/adjustments', 'POST', adjustmentRecord);
   };
 
   // ----------------------------------------------------
@@ -743,9 +911,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (prod) {
       const qtyBefore = prod.stockQuantity;
       const qtyAfter = qtyBefore + data.quantity;
-      updateProduct(prod.id, { stockQuantity: qtyAfter });
+      saveProducts(products.map(p => p.id === prod.id ? { ...p, stockQuantity: qtyAfter, updatedAt: new Date().toISOString() } : p));
 
-      saveAdjustments([{
+      const returnAdjustment: StockAdjustment = {
         id: `adj_ret_${Date.now()}`,
         productId: prod.id,
         productName: prod.name,
@@ -757,10 +925,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         reason: `Customer Return #${retRecord.returnNumber} from INV #${data.invoiceNumber}`,
         date: new Date().toISOString(),
         adjustedBy: data.processedBy,
-      }, ...adjustments]);
+      };
+      saveAdjustments([returnAdjustment, ...adjustments]);
+      sendJson('/api/adjustments', 'POST', returnAdjustment);
     }
 
     saveReturns([retRecord, ...returns]);
+    sendJson('/api/returns', 'POST', retRecord);
     return retRecord;
   };
 
