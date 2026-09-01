@@ -21,7 +21,13 @@ export default function ReturnsPage() {
 
   const selectedSale = sales.find(s => s.id === selectedSaleId);
   const selectedSaleItem = selectedSale?.items.find(item => item.productId === selectedProductId);
-  const maxReturnQuantity = selectedSaleItem?.quantity ?? 1;
+
+  const alreadyReturnedQty = returns
+    .filter(r => r.saleId === selectedSaleId && r.productId === selectedProductId && r.status === 'Approved')
+    .reduce((sum, r) => sum + r.quantity, 0);
+
+  const purchasedQuantity = selectedSaleItem?.quantity ?? 0;
+  const maxReturnQuantity = Math.max(0, purchasedQuantity - alreadyReturnedQty);
 
   React.useEffect(() => {
     if (!selectedSaleId && sales.length > 0) {
@@ -35,6 +41,14 @@ export default function ReturnsPage() {
     }
   }, [selectedSale]);
 
+  React.useEffect(() => {
+    if (maxReturnQuantity > 0) {
+      setQuantity(prev => Math.min(prev > 0 ? prev : 1, maxReturnQuantity));
+    } else {
+      setQuantity(0);
+    }
+  }, [selectedSaleId, selectedProductId, maxReturnQuantity]);
+
   const handleSubmitReturn = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSale || !selectedProductId) {
@@ -42,8 +56,18 @@ export default function ReturnsPage() {
       return;
     }
 
+    if (maxReturnQuantity <= 0) {
+      alert('All purchased units for this item have already been returned.');
+      return;
+    }
+
     if (quantity > maxReturnQuantity) {
-      alert(`Return quantity cannot exceed purchased quantity (${maxReturnQuantity}).`);
+      alert(`Return quantity cannot exceed available returnable quantity (${maxReturnQuantity} pcs).`);
+      return;
+    }
+
+    if (quantity < 1) {
+      alert('Return quantity must be at least 1.');
       return;
     }
 
@@ -236,11 +260,18 @@ export default function ReturnsPage() {
                     onChange={(e) => setSelectedProductId(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
                   >
-                    {selectedSale.items.map(item => (
-                      <option key={item.productId} value={item.productId}>
-                        {item.productName} (Bought: {item.quantity} pcs @ ৳{item.unitPrice})
-                      </option>
-                    ))}
+                    {selectedSale.items.map(item => {
+                      const itemAlreadyReturned = returns
+                        .filter(r => r.saleId === selectedSale.id && r.productId === item.productId && r.status === 'Approved')
+                        .reduce((sum, r) => sum + r.quantity, 0);
+                      const itemMax = Math.max(0, item.quantity - itemAlreadyReturned);
+
+                      return (
+                        <option key={item.productId} value={item.productId}>
+                          {item.productName} (Bought: {item.quantity} pcs | Returnable: {itemMax} pcs)
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               )}
@@ -251,17 +282,33 @@ export default function ReturnsPage() {
                 </label>
                 <input
                   type="number"
-                  min="1"
+                  min={maxReturnQuantity > 0 ? 1 : 0}
                   max={maxReturnQuantity}
                   required
+                  disabled={maxReturnQuantity === 0}
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.min(maxReturnQuantity, Math.max(1, Number(e.target.value))))}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white"
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (maxReturnQuantity === 0) {
+                      setQuantity(0);
+                    } else {
+                      setQuantity(Math.min(maxReturnQuantity, Math.max(1, val)));
+                    }
+                  }}
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white disabled:opacity-50"
                 />
                 {selectedSaleItem && (
                   <p className="text-[10px] text-slate-400 mt-1">
-                    Purchased quantity: {maxReturnQuantity} pcs
+                    Purchased: {purchasedQuantity} pcs
+                    {alreadyReturnedQty > 0 && ` (Already returned: ${alreadyReturnedQty} pcs)`}
+                    {` • Max returnable: ${maxReturnQuantity} pcs`}
                   </p>
+                )}
+                {selectedSaleItem && maxReturnQuantity === 0 && (
+                  <div className="mt-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-medium flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500" />
+                    <span>All purchased units for this item have already been returned.</span>
+                  </div>
                 )}
               </div>
 
@@ -289,7 +336,8 @@ export default function ReturnsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="py-2 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5"
+                  disabled={maxReturnQuantity === 0}
+                  className="py-2 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition flex items-center gap-1.5"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>Authorize Return & Refund</span>
