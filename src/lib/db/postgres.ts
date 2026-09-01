@@ -25,12 +25,18 @@ const connectionString = normalizeConnectionString(rawConnectionString);
 let pool: Pool | null = null;
 
 if (connectionString) {
+  const isCloudDb = 
+    connectionString.includes('supabase.co') || 
+    connectionString.includes('neon.tech') || 
+    connectionString.includes('sslmode=require') ||
+    process.env.NODE_ENV === 'production';
+
   pool = new Pool({
     connectionString,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+    ssl: isCloudDb ? { rejectUnauthorized: false } : undefined,
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 10000,
   });
 }
 
