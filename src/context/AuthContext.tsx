@@ -24,12 +24,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const USERS_STORAGE_KEY = 'rbms_users_v2';
 const CURRENT_USER_KEY = 'rbms_current_user_v3';
 
+const mapUserFromApi = (user: any): User => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  requestedRole: user.requestedRole ?? user.requested_role,
+  status: user.status,
+  phone: user.phone ?? undefined,
+  createdAt: user.createdAt ?? user.created_at ?? new Date().toISOString(),
+  lastLogin: user.lastLogin ?? user.last_login ?? undefined,
+});
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Initialize users from storage or mock data
+  // Initialize users from storage first, then hydrate from the backend API.
   useEffect(() => {
     try {
       const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
@@ -52,7 +64,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoading(false);
     }
+
+    const loadBackendUsers = async () => {
+      try {
+        const response = await fetch('/api/users', { cache: 'no-store' });
+        if (!response.ok) return;
+
+        const result = await response.json();
+        const apiUsers: User[] = (result.users ?? []).map(mapUserFromApi);
+        setUsers(apiUsers);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(apiUsers));
+
+        const storedCurrentUser = localStorage.getItem(CURRENT_USER_KEY);
+        if (storedCurrentUser) {
+          const current = JSON.parse(storedCurrentUser) as User;
+          const refreshedCurrent = apiUsers.find(user => user.id === current.id);
+          if (refreshedCurrent) {
+            setCurrentUser(refreshedCurrent);
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(refreshedCurrent));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading users from backend API:', error);
+      }
+    };
+
+    loadBackendUsers();
   }, []);
+
+  const updateUserInBackend = (payload: { id: string; role?: UserRole; status?: UserStatus }) => {
+    fetch('/api/users', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(error => console.error('Error updating user in backend API:', error));
+  };
 
   const saveUsers = (updatedUsers: User[]) => {
     setUsers(updatedUsers);
@@ -198,15 +244,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const approveUser = (userId: string) => {
     const updated = users.map(u => {
       if (u.id === userId) {
+        const role = u.requestedRole || u.role;
         return { 
           ...u, 
           status: 'Active' as UserStatus, 
-          role: u.requestedRole || u.role 
+          role,
+          requestedRole: role,
         };
       }
       return u;
     });
     saveUsers(updated);
+    const approvedUser = users.find(user => user.id === userId);
+    updateUserInBackend({ id: userId, role: approvedUser?.requestedRole || approvedUser?.role, status: 'Active' });
   };
 
   const rejectUser = (userId: string) => {
@@ -217,6 +267,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return u;
     });
     saveUsers(updated);
+    updateUserInBackend({ id: userId, status: 'Inactive' });
   };
 
   const updateUserRole = (userId: string, newRole: UserRole) => {
@@ -227,6 +278,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return u;
     });
     saveUsers(updated);
+    updateUserInBackend({ id: userId, role: newRole });
 
     if (currentUser && currentUser.id === userId) {
       const updatedCurrent = { ...currentUser, role: newRole };
@@ -243,11 +295,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return u;
     });
     saveUsers(updated);
+    updateUserInBackend({ id: userId, status });
   };
 
   const deleteUser = (userId: string) => {
     const updated = users.filter(u => u.id !== userId);
     saveUsers(updated);
+    fetch(`/api/users?id=${encodeURIComponent(userId)}`, { method: 'DELETE' })
+      .catch(error => console.error('Error deleting user from backend API:', error));
   };
 
   return (

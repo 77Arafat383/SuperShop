@@ -108,6 +108,73 @@ const STORAGE_KEYS = {
   RETURNS: 'rbms_returns_v2',
 };
 
+const titleFromId = (id?: string) => {
+  if (!id) return 'General';
+  return id
+    .replace(/^cat_/, '')
+    .split('_')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+};
+
+const toNumber = (value: unknown) => Number(value ?? 0);
+
+const mapSupplierFromApi = (supplier: any): Supplier => ({
+  id: supplier.id,
+  name: supplier.name,
+  contactPerson: supplier.contactPerson ?? supplier.contact_person ?? '',
+  phone: supplier.phone ?? '',
+  email: supplier.email ?? '',
+  address: supplier.address ?? '',
+  paymentTerms: supplier.paymentTerms ?? supplier.payment_terms ?? 'Net 30',
+  status: supplier.status ?? 'Active',
+  totalPurchased: toNumber(supplier.totalPurchased ?? supplier.total_purchased),
+  totalPaid: toNumber(supplier.totalPaid ?? supplier.total_paid),
+  totalDue: toNumber(supplier.totalDue ?? supplier.total_due),
+  suppliedProducts: supplier.suppliedProducts ?? [],
+  createdAt: supplier.createdAt ?? supplier.created_at ?? new Date().toISOString(),
+});
+
+const mapProductFromApi = (product: any, suppliersById: Map<string, Supplier>): Product => {
+  const categoryId = product.categoryId ?? product.category_id ?? '';
+  const supplierId = product.supplierId ?? product.supplier_id ?? '';
+  return {
+    id: product.id,
+    name: product.name,
+    sku: product.sku,
+    barcode: product.barcode,
+    description: product.description ?? '',
+    categoryId,
+    categoryName: product.categoryName ?? product.category_name ?? titleFromId(categoryId),
+    brand: product.brand ?? 'Standard',
+    purchasePrice: toNumber(product.purchasePrice ?? product.purchase_price),
+    sellingPrice: toNumber(product.sellingPrice ?? product.selling_price),
+    discount: toNumber(product.discount),
+    stockQuantity: toNumber(product.stockQuantity ?? product.stock_quantity),
+    minStockLevel: toNumber(product.minStockLevel ?? product.min_stock_level ?? 5),
+    unit: product.unit ?? 'pcs',
+    supplierId,
+    supplierName: product.supplierName ?? product.supplier_name ?? suppliersById.get(supplierId)?.name ?? 'Local Supplier',
+    imageUrl: product.imageUrl ?? product.image_url ?? undefined,
+    status: product.status ?? 'Active',
+    createdAt: product.createdAt ?? product.created_at ?? new Date().toISOString(),
+    updatedAt: product.updatedAt ?? product.updated_at ?? new Date().toISOString(),
+  };
+};
+
+const categoriesFromProducts = (products: Product[]): Category[] => {
+  const byId = new Map<string, Category>();
+  products.forEach(product => {
+    if (!product.categoryId || byId.has(product.categoryId)) return;
+    byId.set(product.categoryId, {
+      id: product.categoryId,
+      name: product.categoryName || titleFromId(product.categoryId),
+      productCount: products.filter(p => p.categoryId === product.categoryId).length,
+    });
+  });
+  return Array.from(byId.values());
+};
+
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -144,6 +211,38 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAdjustments([]);
       setReturns([]);
     }
+
+    const loadBackendData = async () => {
+      try {
+        const [productsResponse, suppliersResponse] = await Promise.all([
+          fetch('/api/products', { cache: 'no-store' }),
+          fetch('/api/suppliers', { cache: 'no-store' }),
+        ]);
+
+        if (!productsResponse.ok || !suppliersResponse.ok) return;
+
+        const [productsResult, suppliersResult] = await Promise.all([
+          productsResponse.json(),
+          suppliersResponse.json(),
+        ]);
+
+        const apiSuppliers: Supplier[] = (suppliersResult.suppliers ?? []).map(mapSupplierFromApi);
+        const suppliersById = new Map<string, Supplier>(apiSuppliers.map(supplier => [supplier.id, supplier]));
+        const apiProducts = (productsResult.products ?? []).map((product: any) => mapProductFromApi(product, suppliersById));
+        const apiCategories = categoriesFromProducts(apiProducts);
+
+        setProducts(apiProducts);
+        setSuppliers(apiSuppliers);
+        setCategories(apiCategories);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(apiProducts));
+        localStorage.setItem(STORAGE_KEYS.SUPPLIERS, JSON.stringify(apiSuppliers));
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(apiCategories));
+      } catch (error) {
+        console.error('Error hydrating data from backend API:', error);
+      }
+    };
+
+    loadBackendData();
   }, []);
 
   // Save helpers
@@ -194,6 +293,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     const updated = [newProduct, ...products];
     saveProducts(updated);
+    fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProduct),
+    }).catch(error => console.error('Error saving product to backend API:', error));
     return newProduct;
   };
 
