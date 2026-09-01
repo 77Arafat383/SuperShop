@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import { 
   RotateCcw, Plus, Search, CheckCircle, AlertTriangle, 
-  Calendar, ShoppingBag, ArrowRight, Save 
+  Calendar, ShoppingBag, ArrowRight, Save, Check, X, Clock
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { formatBDT, formatDate } from '@/lib/utils';
 
 export default function ReturnsPage() {
-  const { returns, sales, products, processReturn } = useData();
+  const { returns, sales, products, processReturn, approveReturn, rejectReturn } = useData();
   const { currentUser } = useAuth();
 
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
@@ -19,11 +19,13 @@ export default function ReturnsPage() {
   const [quantity, setQuantity] = useState(1);
   const [reason, setReason] = useState('Customer changed mind / Defective seal');
 
+  const isManagerOrAdmin = ['Administrator', 'Inventory Manager', 'Purchase Manager'].includes(currentUser?.role || '');
+
   const selectedSale = sales.find(s => s.id === selectedSaleId);
   const selectedSaleItem = selectedSale?.items.find(item => item.productId === selectedProductId);
 
   const alreadyReturnedQty = returns
-    .filter(r => r.saleId === selectedSaleId && r.productId === selectedProductId && r.status === 'Approved')
+    .filter(r => r.saleId === selectedSaleId && r.productId === selectedProductId && r.status !== 'Rejected')
     .reduce((sum, r) => sum + r.quantity, 0);
 
   const purchasedQuantity = selectedSaleItem?.quantity ?? 0;
@@ -57,7 +59,7 @@ export default function ReturnsPage() {
     }
 
     if (maxReturnQuantity <= 0) {
-      alert('All purchased units for this item have already been returned.');
+      alert('All purchased units for this item have already been returned or requested.');
       return;
     }
 
@@ -71,22 +73,32 @@ export default function ReturnsPage() {
       return;
     }
 
+    const initialStatus: 'Approved' | 'Pending' = isManagerOrAdmin ? 'Approved' : 'Pending';
+
     processReturn({
       saleId: selectedSale.id,
       invoiceNumber: selectedSale.invoiceNumber,
       productId: selectedProductId,
       quantity: Number(quantity),
       reason,
-      processedBy: currentUser?.name || 'Cashier',
+      processedBy: currentUser?.name ? `${currentUser.name} (${currentUser.role})` : 'Cashier',
+      status: initialStatus,
     });
 
     setIsReturnModalOpen(false);
     setQuantity(1);
     setReason('Customer changed mind / Defective seal');
+
+    if (initialStatus === 'Pending') {
+      alert('Return request submitted successfully! Pending Inventory Manager approval.');
+    } else {
+      alert('Return authorized and stock replenished successfully!');
+    }
   };
 
   const totalRefunded = returns.reduce((acc, r) => acc + (r.status === 'Approved' ? r.refundAmount : 0), 0);
   const totalUnitsReturned = returns.reduce((acc, r) => acc + (r.status === 'Approved' ? r.quantity : 0), 0);
+  const pendingCount = returns.filter(r => r.status === 'Pending').length;
 
   return (
     <div className="space-y-6">
@@ -98,6 +110,18 @@ export default function ReturnsPage() {
           Process customer merchandise returns, issue instant cash/MFS refunds, and automatically replenish stock.
         </p>
       </div>
+
+      {/* Pending Approval Banner for Managers */}
+      {isManagerOrAdmin && pendingCount > 0 && (
+        <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-2xl flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-2.5 text-xs text-amber-800 dark:text-amber-300 font-medium">
+            <Clock className="w-4 h-4 text-amber-600 shrink-0 animate-spin" />
+            <span>
+              Action Required: <strong>{pendingCount} return request{pendingCount > 1 ? 's' : ''}</strong> pending Inventory Manager approval.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -134,8 +158,13 @@ export default function ReturnsPage() {
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               Total Return Incidents
             </span>
-            <div className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
-              {returns.length} Cases
+            <div className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5 flex items-center gap-2">
+              <span>{returns.length} Cases</span>
+              {pendingCount > 0 && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                  {pendingCount} Pending
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -150,7 +179,7 @@ export default function ReturnsPage() {
 
       {/* Returns Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <h3 className="text-xs font-bold text-slate-900 dark:text-white">
             Customer Return Log & Restocking
           </h3>
@@ -168,6 +197,7 @@ export default function ReturnsPage() {
                 <th className="py-3 px-4">Reason</th>
                 <th className="py-3 px-4">Processed By</th>
                 <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
@@ -207,9 +237,46 @@ export default function ReturnsPage() {
                   </td>
 
                   <td className="py-3 px-4 text-center">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                      {ret.status}
-                    </span>
+                    {ret.status === 'Approved' && (
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        Approved
+                      </span>
+                    )}
+                    {ret.status === 'Pending' && (
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 animate-pulse">
+                        Pending Approval
+                      </span>
+                    )}
+                    {ret.status === 'Rejected' && (
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+                        Declined
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="py-3 px-4 text-center">
+                    {ret.status === 'Pending' && isManagerOrAdmin ? (
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => approveReturn(ret.id, currentUser?.name || 'Inventory Manager')}
+                          className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold transition flex items-center gap-1 shadow-sm"
+                          title="Approve Return & Replenish Stock"
+                        >
+                          <Check className="w-3 h-3" />
+                          <span>Approve</span>
+                        </button>
+                        <button
+                          onClick={() => rejectReturn(ret.id, currentUser?.name || 'Inventory Manager')}
+                          className="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold transition flex items-center gap-1 shadow-sm"
+                          title="Decline Return Request"
+                        >
+                          <X className="w-3 h-3" />
+                          <span>Decline</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-slate-400 font-mono">-</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -262,7 +329,7 @@ export default function ReturnsPage() {
                   >
                     {selectedSale.items.map(item => {
                       const itemAlreadyReturned = returns
-                        .filter(r => r.saleId === selectedSale.id && r.productId === item.productId && r.status === 'Approved')
+                        .filter(r => r.saleId === selectedSale.id && r.productId === item.productId && r.status !== 'Rejected')
                         .reduce((sum, r) => sum + r.quantity, 0);
                       const itemMax = Math.max(0, item.quantity - itemAlreadyReturned);
 
@@ -300,14 +367,14 @@ export default function ReturnsPage() {
                 {selectedSaleItem && (
                   <p className="text-[10px] text-slate-400 mt-1">
                     Purchased: {purchasedQuantity} pcs
-                    {alreadyReturnedQty > 0 && ` (Already returned: ${alreadyReturnedQty} pcs)`}
+                    {alreadyReturnedQty > 0 && ` (Already returned/requested: ${alreadyReturnedQty} pcs)`}
                     {` • Max returnable: ${maxReturnQuantity} pcs`}
                   </p>
                 )}
                 {selectedSaleItem && maxReturnQuantity === 0 && (
                   <div className="mt-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-medium flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500" />
-                    <span>All purchased units for this item have already been returned.</span>
+                    <span>All purchased units for this item have already been returned or requested.</span>
                   </div>
                 )}
               </div>
@@ -326,6 +393,12 @@ export default function ReturnsPage() {
                 />
               </div>
 
+              {!isManagerOrAdmin && (
+                <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 rounded-xl text-blue-700 dark:text-blue-300 text-[11px]">
+                  <strong>Cashier Notice:</strong> Submitting this return will send a request to the Inventory Manager for approval before stock is replenished.
+                </div>
+              )}
+
               <div className="pt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
@@ -340,7 +413,7 @@ export default function ReturnsPage() {
                   className="py-2 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition flex items-center gap-1.5"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  <span>Authorize Return & Refund</span>
+                  <span>{isManagerOrAdmin ? 'Authorize Return & Refund' : 'Submit Return Request'}</span>
                 </button>
               </div>
             </form>

@@ -26,3 +26,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || 'Return save failed' }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const { id, status } = await request.json();
+    await query(
+      `UPDATE product_returns SET status = $1 WHERE id = $2`,
+      [status, id]
+    );
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Return update failed' }, { status: 500 });
+  }
+}

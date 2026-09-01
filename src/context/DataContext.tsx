@@ -90,7 +90,11 @@ interface DataContextType {
     quantity: number;
     reason: string;
     processedBy: string;
+    status?: 'Approved' | 'Pending' | 'Rejected';
   }) => ProductReturn;
+
+  approveReturn: (returnId: string, approvedBy: string) => void;
+  rejectReturn: (returnId: string, rejectedBy: string) => void;
 
   // Reset demo data
   resetToDefaultData: () => void;
@@ -886,10 +890,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     quantity: number;
     reason: string;
     processedBy: string;
+    status?: 'Approved' | 'Pending' | 'Rejected';
   }): ProductReturn => {
     const prod = products.find(p => p.id === data.productId);
     const unitPrice = prod?.sellingPrice || 0;
     const refundAmount = unitPrice * data.quantity;
+    const returnStatus = data.status || 'Approved';
 
     const retRecord: ProductReturn = {
       id: `ret_${Date.now()}`,
@@ -904,11 +910,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       reason: data.reason,
       returnDate: new Date().toISOString(),
       processedBy: data.processedBy,
-      status: 'Approved',
+      status: returnStatus,
     };
 
-    // Replenish stock for returned items
-    if (prod) {
+    // Replenish stock ONLY if approved upon creation
+    if (prod && returnStatus === 'Approved') {
       const qtyBefore = prod.stockQuantity;
       const qtyAfter = qtyBefore + data.quantity;
       saveProducts(products.map(p => p.id === prod.id ? { ...p, stockQuantity: qtyAfter, updatedAt: new Date().toISOString() } : p));
@@ -933,6 +939,52 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveReturns([retRecord, ...returns]);
     sendJson('/api/returns', 'POST', retRecord).then(() => loadBackendData());
     return retRecord;
+  };
+
+  const approveReturn = (returnId: string, approvedBy: string) => {
+    const ret = returns.find(r => r.id === returnId);
+    if (!ret || ret.status !== 'Pending') return;
+
+    const updatedReturns = returns.map(r =>
+      r.id === returnId ? { ...r, status: 'Approved' as const } : r
+    );
+    saveReturns(updatedReturns);
+    sendJson('/api/returns', 'PATCH', { id: returnId, status: 'Approved' }).then(() => loadBackendData());
+
+    // Replenish stock when approved by manager
+    const prod = products.find(p => p.id === ret.productId);
+    if (prod) {
+      const qtyBefore = prod.stockQuantity;
+      const qtyAfter = qtyBefore + ret.quantity;
+      saveProducts(products.map(p => p.id === prod.id ? { ...p, stockQuantity: qtyAfter, updatedAt: new Date().toISOString() } : p));
+
+      const returnAdjustment: StockAdjustment = {
+        id: `adj_ret_${Date.now()}`,
+        productId: prod.id,
+        productName: prod.name,
+        sku: prod.sku,
+        adjustmentType: 'Stock In',
+        quantityBefore: qtyBefore,
+        quantityChange: ret.quantity,
+        quantityAfter: qtyAfter,
+        reason: `Customer Return #${ret.returnNumber} Approved by ${approvedBy}`,
+        date: new Date().toISOString(),
+        adjustedBy: approvedBy,
+      };
+      saveAdjustments([returnAdjustment, ...adjustments]);
+      sendJson('/api/adjustments', 'POST', returnAdjustment).then(() => loadBackendData());
+    }
+  };
+
+  const rejectReturn = (returnId: string, _rejectedBy: string) => {
+    const ret = returns.find(r => r.id === returnId);
+    if (!ret || ret.status !== 'Pending') return;
+
+    const updatedReturns = returns.map(r =>
+      r.id === returnId ? { ...r, status: 'Rejected' as const } : r
+    );
+    saveReturns(updatedReturns);
+    sendJson('/api/returns', 'PATCH', { id: returnId, status: 'Rejected' }).then(() => loadBackendData());
   };
 
   // ----------------------------------------------------
@@ -1041,6 +1093,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       processSale,
       adjustStock,
       processReturn,
+      approveReturn,
+      rejectReturn,
       resetToDefaultData,
     }}>
       {children}
