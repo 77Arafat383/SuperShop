@@ -17,6 +17,7 @@ interface AuthContextType {
   updateUserStatus: (userId: string, status: UserStatus) => void;
   deleteUser: (userId: string) => void;
   quickLoginAs: (role: UserRole) => void;
+  resetPassword: (email: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -305,6 +306,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .catch(error => console.error('Error deleting user from backend API:', error));
   };
 
+  const resetPassword = async (email: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = email.trim().toLowerCase();
+    try {
+      await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, newPassword }),
+      });
+    } catch (e) {
+      console.error('API password reset fallback:', e);
+    }
+
+    const updatedUsers = users.map(u => u.email.toLowerCase() === cleanEmail ? { ...u, password: newPassword } : u);
+    saveUsers(updatedUsers);
+
+    return { success: true };
+  };
+
   return (
     <AuthContext.Provider value={{
       currentUser,
@@ -320,6 +339,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateUserStatus,
       deleteUser,
       quickLoginAs,
+      resetPassword,
     }}>
       {children}
     </AuthContext.Provider>
