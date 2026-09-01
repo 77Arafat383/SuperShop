@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "db:seed": "node scripts/seed-mock-data.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

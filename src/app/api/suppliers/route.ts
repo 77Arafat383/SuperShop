@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres';
-import { INITIAL_SUPPLIERS } from '@/lib/mockData';
 
 export async function GET() {
   try {
@@ -8,8 +7,8 @@ export async function GET() {
     if (dbRes && dbRes.rows && dbRes.rows.length > 0) {
       return NextResponse.json({ success: true, suppliers: dbRes.rows });
     }
-    return NextResponse.json({ success: true, suppliers: INITIAL_SUPPLIERS });
+    return NextResponse.json({ success: true, suppliers: [] });
   } catch (error: any) {
-    return NextResponse.json({ success: true, suppliers: INITIAL_SUPPLIERS });
+    return NextResponse.json({ success: false, error: error.message, suppliers: [] }, { status: 500 });
   }
 }

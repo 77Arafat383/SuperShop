@@ -7,10 +7,6 @@ import {
   PaymentMethod, PaymentDetails, PurchasePaymentRecord
 } from '@/types';
 import {
-  INITIAL_PRODUCTS, INITIAL_CATEGORIES, INITIAL_SUPPLIERS,
-  INITIAL_PURCHASES, INITIAL_SALES, INITIAL_ADJUSTMENTS, INITIAL_RETURNS
-} from '@/lib/mockData';
-import {
   generateInvoiceNumber, generatePONumber, generateReceiptNumber,
   generateReturnNumber
 } from '@/lib/utils';
@@ -131,22 +127,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return defaultVal;
       };
 
-      setProducts(getOrSet(STORAGE_KEYS.PRODUCTS, INITIAL_PRODUCTS));
-      setCategories(getOrSet(STORAGE_KEYS.CATEGORIES, INITIAL_CATEGORIES));
-      setSuppliers(getOrSet(STORAGE_KEYS.SUPPLIERS, INITIAL_SUPPLIERS));
-      setPurchases(getOrSet(STORAGE_KEYS.PURCHASES, INITIAL_PURCHASES));
-      setSales(getOrSet(STORAGE_KEYS.SALES, INITIAL_SALES));
-      setAdjustments(getOrSet(STORAGE_KEYS.ADJUSTMENTS, INITIAL_ADJUSTMENTS));
-      setReturns(getOrSet(STORAGE_KEYS.RETURNS, INITIAL_RETURNS));
+      setProducts(getOrSet(STORAGE_KEYS.PRODUCTS, []));
+      setCategories(getOrSet(STORAGE_KEYS.CATEGORIES, []));
+      setSuppliers(getOrSet(STORAGE_KEYS.SUPPLIERS, []));
+      setPurchases(getOrSet(STORAGE_KEYS.PURCHASES, []));
+      setSales(getOrSet(STORAGE_KEYS.SALES, []));
+      setAdjustments(getOrSet(STORAGE_KEYS.ADJUSTMENTS, []));
+      setReturns(getOrSet(STORAGE_KEYS.RETURNS, []));
     } catch (e) {
       console.error('Error hydrating data from localStorage:', e);
-      setProducts(INITIAL_PRODUCTS);
-      setCategories(INITIAL_CATEGORIES);
-      setSuppliers(INITIAL_SUPPLIERS);
-      setPurchases(INITIAL_PURCHASES);
-      setSales(INITIAL_SALES);
-      setAdjustments(INITIAL_ADJUSTMENTS);
-      setReturns(INITIAL_RETURNS);
+      setProducts([]);
+      setCategories([]);
+      setSuppliers([]);
+      setPurchases([]);
+      setSales([]);
+      setAdjustments([]);
+      setReturns([]);
     }
   }, []);
 
@@ -735,13 +731,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [sales, purchases, products, suppliers, returns]);
 
   const resetToDefaultData = () => {
-    saveProducts(INITIAL_PRODUCTS);
-    saveCategories(INITIAL_CATEGORIES);
-    saveSuppliers(INITIAL_SUPPLIERS);
-    savePurchases(INITIAL_PURCHASES);
-    saveSales(INITIAL_SALES);
-    saveAdjustments(INITIAL_ADJUSTMENTS);
-    saveReturns(INITIAL_RETURNS);
+    saveProducts([]);
+    saveCategories([]);
+    saveSuppliers([]);
+    savePurchases([]);
+    saveSales([]);
+    saveAdjustments([]);
+    saveReturns([]);
   };
 
   return (

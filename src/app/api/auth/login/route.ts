@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres';
-import { INITIAL_USERS } from '@/lib/mockData';
 
 export async function POST(request: Request) {
   try {
@@ -22,17 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, user });
     }
 
-    // Fallback in-memory
-    const mockUser = INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail);
-    if (!mockUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    if (mockUser.status === 'Pending Approval') {
-      return NextResponse.json({ error: 'Account pending Administrator approval' }, { status: 403 });
-    }
-
-    return NextResponse.json({ success: true, user: mockUser });
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Login failed' }, { status: 500 });
   }

@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole, UserStatus } from '@/types';
-import { INITIAL_USERS } from '@/lib/mockData';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -23,7 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const USERS_STORAGE_KEY = 'rbms_users_v2';
-const CURRENT_USER_KEY = 'rbms_current_user_v2';
+const CURRENT_USER_KEY = 'rbms_current_user_v3';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [users, setUsers] = useState<User[]>([]);
@@ -39,21 +38,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (storedUsers) {
         setUsers(JSON.parse(storedUsers));
       } else {
-        setUsers(INITIAL_USERS);
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(INITIAL_USERS));
+        setUsers([]);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([]));
       }
 
       if (storedCurrentUser) {
         setCurrentUser(JSON.parse(storedCurrentUser));
-      } else {
-        // Default to Admin for frictionless testing
-        setCurrentUser(INITIAL_USERS[0]);
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(INITIAL_USERS[0]));
       }
     } catch (e) {
       console.error('Error loading users from localStorage:', e);
-      setUsers(INITIAL_USERS);
-      setCurrentUser(INITIAL_USERS[0]);
+      setUsers([]);
+      setCurrentUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -66,6 +61,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, _password?: string): Promise<{ success: boolean; error?: string; user?: User }> => {
     const cleanEmail = email.trim().toLowerCase();
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password: _password }),
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success && result.user) {
+        const apiUser = {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          role: result.user.role,
+          requestedRole: result.user.requested_role,
+          status: result.user.status,
+          phone: result.user.phone,
+          createdAt: result.user.created_at || new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+        } as User;
+        setCurrentUser(apiUser);
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(apiUser));
+        return { success: true, user: apiUser };
+      }
+
+      if (!response.ok && result.error) {
+        return { success: false, error: result.error };
+      }
+    } catch {
+      // Fall back to local users when the API is unavailable in development.
+    }
+
     const user = users.find(u => u.email.toLowerCase() === cleanEmail);
 
     if (!user) {
@@ -103,6 +130,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     requestedRole: UserRole 
   }): Promise<{ success: boolean; message: string }> => {
     const cleanEmail = data.email.trim().toLowerCase();
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, email: cleanEmail }),
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        return { success: true, message: result.message };
+      }
+
+      if (!response.ok && result.error) {
+        return { success: false, message: result.error };
+      }
+    } catch {
+      // Fall back to local registration when the API is unavailable in development.
+    }
+
     const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
     if (existing) {
       return { success: false, message: 'An account with this email already exists.' };

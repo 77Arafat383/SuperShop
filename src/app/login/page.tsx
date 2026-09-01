@@ -2,22 +2,19 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Boxes, Lock, Mail, User as UserIcon, Phone,
-  ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, Sparkles, KeyRound
-} from 'lucide-react';
+import { Boxes, Lock, Mail, User as UserIcon, Phone, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, register, quickLoginAs, users } = useAuth();
+  const { login, register, users } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
 
   // Login fields
-  const [loginEmail, setLoginEmail] = useState('admin@ims.nstu.edu.bd');
-  const [loginPassword, setLoginPassword] = useState('admin123');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
 
   // Registration fields
   const [regName, setRegName] = useState('');
@@ -93,15 +90,6 @@ export default function LoginPage() {
       setErrorMsg(err.message || 'Registration error');
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleQuickLogin = (role: UserRole) => {
-    quickLoginAs(role);
-    if (role === 'Cashier') {
-      router.push('/pos');
-    } else {
-      router.push('/dashboard');
     }
   };
 
