@@ -151,9 +151,9 @@ export default function POSPage() {
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-5 min-h-0 relative">
+      <div className="flex-1 flex flex-col lg:flex-row gap-5 min-h-0 min-w-0 relative">
         {/* Left Catalog Grid */}
-        <div className={`flex-1 flex flex-col min-h-0 ${activeMobileTab === 'catalog' ? 'flex' : 'hidden lg:flex'}`}>
+        <div className={`flex-1 flex flex-col min-h-0 min-w-0 w-full ${activeMobileTab === 'catalog' ? 'flex' : 'hidden lg:flex'}`}>
           <ProductGrid
             products={products}
             categories={categories}
@@ -163,7 +163,7 @@ export default function POSPage() {
         </div>
 
         {/* Right Cart Section */}
-        <div className={`w-full lg:w-[400px] shrink-0 flex flex-col min-h-0 ${activeMobileTab === 'cart' ? 'flex' : 'hidden lg:flex'}`}>
+        <div className={`w-full lg:w-[380px] xl:w-[400px] shrink-0 flex flex-col min-h-0 ${activeMobileTab === 'cart' ? 'flex' : 'hidden lg:flex'}`}>
           <CartDrawer
             cartItems={cartItems}
             customerName={customerName}

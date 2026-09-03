@@ -45,7 +45,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div className="flex flex-col h-full space-y-4 min-w-0 w-full">
       {/* Top Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row items-center gap-3">
         {/* Search input with Barcode trigger */}
@@ -69,7 +69,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
 
       {/* Category Pills Slider */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none min-w-0">
         <button
           onClick={() => setSelectedCategory('All')}
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition ${
@@ -100,8 +100,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         })}
       </div>
 
-      {/* Product Cards Grid */}
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-2 sm:gap-3.5 justify-center content-start overflow-y-auto pr-1 flex-1">
+      {/* Product Cards Grid - Max 5 items per row */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3.5 content-start overflow-y-auto pr-1 flex-1 min-w-0">
         {filteredProducts.length === 0 ? (
           <div className="col-span-full py-12 text-center text-slate-400">
             <ShoppingBag className="w-12 h-12 mx-auto mb-2 opacity-40" />
@@ -120,7 +120,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               <div
                 key={product.id}
                 onClick={() => !isOutOfStock && handleAdd(product)}
-                className={`group relative bg-white dark:bg-slate-900 rounded-3xl border p-3 flex flex-col justify-between transition-all duration-300 select-none max-w-[190px] w-full mx-auto ${
+                className={`group relative bg-white dark:bg-slate-900 rounded-3xl border p-3 flex flex-col justify-between transition-all duration-300 select-none w-full mx-auto ${
                   isOutOfStock
                     ? 'opacity-60 cursor-not-allowed border-slate-200 dark:border-slate-800'
                     : 'cursor-pointer hover:border-blue-500/80 hover:shadow-xl hover:shadow-blue-500/5 active:scale-[0.98] border-slate-200 dark:border-slate-800/80'
