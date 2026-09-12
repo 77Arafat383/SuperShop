@@ -24,8 +24,8 @@ yarn-error.log*
 
 # local env files
 .env
-.env*.local
-.env.production
+.env.*
+!.env.example
 src/lib/mockData.ts
 src/lib/db/mockData.ts
 
