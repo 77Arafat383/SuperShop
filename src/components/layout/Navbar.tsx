@@ -85,16 +85,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           <div className="relative pl-2 border-l border-slate-200 dark:border-slate-800">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2 py-1.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition"
+              className="flex items-center gap-2 p-1.5 sm:py-1.5 sm:px-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition"
               title="View User Profile Menu"
             >
               <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                 <LucideUser className="w-3.5 h-3.5" />
               </div>
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              <span className="hidden sm:inline text-xs font-semibold text-slate-700 dark:text-slate-200">
                 {currentUser?.name || 'Guest User'}
               </span>
-              <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`hidden sm:block w-3 h-3 text-slate-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Dropdown Menu */}

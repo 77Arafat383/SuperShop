@@ -144,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           &copy; {new Date().getFullYear()} SalesTrack. All rights reserved.
         </div>
         <div className="text-[9px] text-slate-600">
-          Md. Yeasin Arafat & Ahosan Habib
+          Md. Yeasin Arafat
         </div>
       </div>
     </aside>
